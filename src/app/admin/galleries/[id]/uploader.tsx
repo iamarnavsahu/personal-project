@@ -42,7 +42,7 @@ export function Uploader({ galleryId }: { galleryId: string }) {
         onClick={onPick}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); onFiles(e.dataTransfer.files); }}
-        className="cursor-pointer rounded-lg border-2 border-dashed border-ink/20 p-8 text-center hover:border-accent"
+        className="cursor-pointer border-2 border-dashed border-ink/20 p-8 text-center transition hover:border-ink"
       >
         <p className="font-medium">Drop JPEGs here or click to choose</p>
         <p className="text-sm text-ink/60">PNGs work too. Up to 50MB per batch.</p>

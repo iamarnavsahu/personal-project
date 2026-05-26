@@ -35,7 +35,7 @@ export default async function AdminHome() {
       {!galleries?.length ? (
         <div className="mt-12 rounded-lg border border-dashed border-ink/20 p-12 text-center">
           <p className="text-ink/60">No galleries yet.</p>
-          <Link href="/admin/galleries/new" className="btn btn-accent mt-4">Create your first</Link>
+          <Link href="/admin/galleries/new" className="btn btn-primary mt-4">Create your first</Link>
         </div>
       ) : (
         <ul className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -47,7 +47,7 @@ export default async function AdminHome() {
                     <h3 className="font-semibold">{g.name}</h3>
                     {g.client_name && <p className="text-sm text-ink/60">for {g.client_name}</p>}
                   </div>
-                  {g.is_locked && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">locked</span>}
+                  {g.is_locked && <span className="border border-ink/30 px-2 py-0.5 text-[10px] uppercase tracking-widest text-ink/70">locked</span>}
                 </div>
                 <div className="mt-3 flex gap-4 text-sm text-ink/60">
                   <span>{counts[g.id]?.photos ?? 0} photos</span>

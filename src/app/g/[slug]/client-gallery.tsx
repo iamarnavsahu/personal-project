@@ -62,9 +62,9 @@ export function ClientGallery({
               <strong>{pickedCount}</strong> picked
             </span>
             {submitted ? (
-              <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-800">✓ Submitted</span>
+              <span className="border border-ink/30 px-3 py-1 text-xs uppercase tracking-widest text-ink/70">✓ Submitted</span>
             ) : (
-              <button onClick={onSubmit} disabled={pending} className="btn btn-accent text-sm">
+              <button onClick={onSubmit} disabled={pending} className="btn btn-primary text-xs">
                 Submit picks
               </button>
             )}
@@ -89,7 +89,7 @@ export function ClientGallery({
                 disabled={submitted}
                 aria-label={p.picked ? "Unpick" : "Pick"}
                 className={`absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full text-lg shadow transition ${
-                  p.picked ? "bg-accent text-white" : "bg-white/90 text-ink hover:bg-white"
+                  p.picked ? "bg-ink text-paper" : "bg-paper/90 text-ink hover:bg-paper"
                 }`}
               >
                 {p.picked ? "★" : "☆"}
@@ -110,7 +110,7 @@ export function ClientGallery({
             onClick={(e) => { e.stopPropagation(); toggle(lightbox); }}
             disabled={submitted}
             className={`absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full px-5 py-2 font-medium shadow ${
-              lightbox.picked ? "bg-accent text-white" : "bg-white text-ink"
+              lightbox.picked ? "bg-ink text-paper" : "bg-paper text-ink"
             }`}
           >
             {lightbox.picked ? "★ Picked" : "☆ Pick this"}

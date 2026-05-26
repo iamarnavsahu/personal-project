@@ -19,7 +19,7 @@ export function PhotoCard({
         <div className="aspect-square w-full bg-ink/10" />
       )}
       {picked && (
-        <span className="absolute left-2 top-2 rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white">
+        <span className="absolute left-2 top-2 rounded-none bg-ink px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-paper">
           ★ picked
         </span>
       )}
