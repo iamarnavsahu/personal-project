@@ -33,8 +33,12 @@ export async function createGallery(formData: FormData) {
   redirect(`/admin/galleries/${data!.id}`);
 }
 
-export async function uploadPhotos(galleryId: string, files: File[]) {
+export async function uploadPhotos(formData: FormData) {
   await requireUser();
+  const galleryId = String(formData.get("galleryId") || "");
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File);
+  if (!galleryId) throw new Error("Missing galleryId");
+  if (!files.length) throw new Error("No files");
   const admin = getSupabaseAdmin();
 
   const { data: gallery, error: gErr } = await admin

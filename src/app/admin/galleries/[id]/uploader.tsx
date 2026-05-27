@@ -25,7 +25,10 @@ export function Uploader({ galleryId }: { galleryId: string }) {
         for (let i = 0; i < arr.length; i += chunkSize) {
           const chunk = arr.slice(i, i + chunkSize);
           setProgress(`Uploading ${i + 1}–${Math.min(i + chunk.length, arr.length)} of ${arr.length}…`);
-          await uploadPhotos(galleryId, chunk);
+          const fd = new FormData();
+          fd.append("galleryId", galleryId);
+          chunk.forEach((file) => fd.append("files", file));
+          await uploadPhotos(fd);
         }
         setProgress("");
         router.refresh();
