@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
-import { deleteGallery } from "@/app/admin/actions";
+import { deleteGallery, updatePasscode } from "@/app/admin/actions";
 import { Uploader } from "./uploader";
 import { PhotoCard } from "./photo-card";
 
@@ -58,8 +58,26 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
         <h2 className="font-semibold">Share with your client</h2>
         <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-center">
           <code className="block truncate rounded bg-ink/5 px-3 py-2 text-sm">{shareUrl}</code>
-          <span className="text-sm text-ink/60">Passcode: set when you created this gallery</span>
+          <span className="text-sm text-ink/60">Passcode: set below</span>
         </div>
+
+        <form
+          action={updatePasscode.bind(null, gallery.id)}
+          className="mt-4 grid gap-2 border-t border-ink/10 pt-4 sm:grid-cols-[1fr_auto] sm:items-end"
+        >
+          <div>
+            <label className="label">Change passcode</label>
+            <input
+              name="passcode"
+              type="text"
+              required
+              minLength={4}
+              placeholder="New passcode"
+              className="input"
+            />
+          </div>
+          <button className="btn btn-ghost text-sm">Update passcode</button>
+        </form>
       </div>
 
       <div>
