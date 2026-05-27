@@ -7,12 +7,16 @@ import { ClientGallery } from "./client-gallery";
 export default async function PublicGalleryPage({ params }: { params: { slug: string } }) {
   const admin = getSupabaseAdmin();
 
-  const { data: gallery } = await admin
+  const { data: gallery, error: gErr } = await admin
     .from("galleries")
     .select("id, name, client_name, slug, is_locked")
     .eq("slug", params.slug)
     .single();
-  if (!gallery) notFound();
+  if (gErr) console.error("[/g/[slug]] gallery query error:", gErr);
+  if (!gallery) {
+    console.error("[/g/[slug]] no gallery for slug:", params.slug);
+    notFound();
+  }
 
   const unlocked = cookies().get(`picka_g_${gallery.id}`)?.value === "1";
 
