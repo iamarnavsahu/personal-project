@@ -10,16 +10,25 @@ function cookieName(galleryId: string) {
 }
 
 export async function unlockGallery(slug: string, formData: FormData) {
+  console.log("[unlockGallery] slug:", slug);
   const passcode = String(formData.get("passcode") || "");
+  console.log("[unlockGallery] passcode length:", passcode.length);
+
   const admin = getSupabaseAdmin();
-  const { data: gallery } = await admin
+  const { data: gallery, error: qErr } = await admin
     .from("galleries")
     .select("id, passcode_hash")
     .eq("slug", slug)
     .single();
-  if (!gallery) return { error: "Gallery not found" };
+  if (qErr) console.error("[unlockGallery] query error:", qErr);
+  if (!gallery) {
+    console.error("[unlockGallery] no gallery for slug", slug);
+    return { error: "Gallery not found" };
+  }
+  console.log("[unlockGallery] hash starts with:", gallery.passcode_hash?.slice(0, 7));
 
   const ok = await bcrypt.compare(passcode, gallery.passcode_hash);
+  console.log("[unlockGallery] compare result:", ok);
   if (!ok) return { error: "Wrong passcode" };
 
   cookies().set(cookieName(gallery.id), "1", {

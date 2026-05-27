@@ -15,9 +15,16 @@ export function PasscodeForm({ slug }: { slug: string }) {
       action={(fd) =>
         start(async () => {
           setErr(null);
-          const res = await unlockGallery(slug, fd);
-          if (res?.error) setErr(res.error);
-          else router.refresh();
+          try {
+            const res = await unlockGallery(slug, fd);
+            console.log("[unlock] response:", res);
+            if (res?.error) setErr(res.error);
+            else if (res?.ok) router.refresh();
+            else setErr("Unexpected response from server");
+          } catch (e: any) {
+            console.error("[unlock] threw:", e);
+            setErr(e?.message || "Something went wrong");
+          }
         })
       }
     >
