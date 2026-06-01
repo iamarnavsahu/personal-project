@@ -14,11 +14,11 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 const PHOTOS = [
   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1604017011826-d3b4c23f8914?w=400&h=500&fit=crop&q=75",
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=500&fit=crop&q=75",
   "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=400&h=500&fit=crop&q=75",
   "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=500&fit=crop&q=75",
   "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?w=400&h=500&fit=crop&q=75"
+  "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=500&fit=crop&q=75"
 ];
 const PICKED = new Set([0, 2, 4]);
 
@@ -41,15 +41,15 @@ function Section1Upload() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start start", "end end"]
   });
 
-  const laptopScale = useTransform(scrollYProgress, [0, 0.35, 0.7, 1], [0.8, 1.0, 1.0, 1.0]);
-  const laptopOpacity = useTransform(scrollYProgress, [0, 0.2, 0.9, 1], [0, 1, 1, 1]);
-  const textOpacity = useTransform(scrollYProgress, [0.15, 0.3, 0.7, 0.85], [0, 1, 1, 0]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.3, 1], [0.85, 1.0, 1.0]);
+  const laptopOpacity = useTransform(scrollYProgress, [0, 0.15, 1], [0.4, 1, 1]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.12, 0.85, 1], [0, 1, 1, 0]);
 
   return (
-    <section ref={ref} className="relative" style={{ height: "200vh" }}>
+    <section ref={ref} className="relative" style={{ height: "130vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-10">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16">
           <motion.div style={{ opacity: textOpacity }} className="z-10">
@@ -102,11 +102,11 @@ function FlyingPhoto({
   from: { x: number; y: number; r: number };
   index: number;
 }) {
-  const opacity = useTransform(progress, [0.05, 0.20, 0.42, 0.50], [0, 1, 1, 0]);
-  const x = useTransform(progress, [0.20, 0.50], [from.x, 0]);
-  const y = useTransform(progress, [0.20, 0.50], [from.y, 0]);
-  const scale = useTransform(progress, [0.20, 0.50], [1, 0.2]);
-  const rotate = useTransform(progress, [0.20, 0.50], [from.r, 0]);
+  const opacity = useTransform(progress, [0, 0.1, 0.55, 0.65], [0, 1, 1, 0]);
+  const x = useTransform(progress, [0.1, 0.65], [from.x, 0]);
+  const y = useTransform(progress, [0.1, 0.65], [from.y, 0]);
+  const scale = useTransform(progress, [0.1, 0.65], [1, 0.2]);
+  const rotate = useTransform(progress, [0.1, 0.65], [from.r, 0]);
   return (
     <motion.div
       aria-hidden
@@ -127,18 +127,18 @@ function Section2Share() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start start", "end end"]
   });
 
-  const laptopX = useTransform(scrollYProgress, [0.3, 0.55], [0, -120]);
-  const panelOpacity = useTransform(scrollYProgress, [0.35, 0.55], [0, 1]);
-  const panelX = useTransform(scrollYProgress, [0.35, 0.55], [80, 0]);
-  const textOpacity = useTransform(scrollYProgress, [0.15, 0.3, 0.75, 0.9], [0, 1, 1, 0]);
-  const passwordOn = useTransform(scrollYProgress, [0.55, 0.65], [0, 1]);
-  const copied = useTransform(scrollYProgress, [0.7, 0.78], [0, 1]);
+  const laptopX = useTransform(scrollYProgress, [0.1, 0.35], [0, -120]);
+  const panelOpacity = useTransform(scrollYProgress, [0.15, 0.4], [0, 1]);
+  const panelX = useTransform(scrollYProgress, [0.15, 0.4], [80, 0]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.12, 0.85, 1], [0, 1, 1, 0]);
+  const passwordOn = useTransform(scrollYProgress, [0.45, 0.6], [0, 1]);
+  const copied = useTransform(scrollYProgress, [0.65, 0.75], [0, 1]);
 
   return (
-    <section ref={ref} className="relative" style={{ height: "220vh" }}>
+    <section ref={ref} className="relative" style={{ height: "140vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-10">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16">
           <motion.div style={{ opacity: textOpacity }} className="z-10">
@@ -239,19 +239,19 @@ function Section3PhoneView() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start start", "end end"]
   });
 
-  const laptopScale = useTransform(scrollYProgress, [0.2, 0.5], [1, 0.85]);
-  const laptopX = useTransform(scrollYProgress, [0.2, 0.5], [0, -100]);
-  const laptopOpacity = useTransform(scrollYProgress, [0.2, 0.5], [1, 0.4]);
-  const phoneOpacity = useTransform(scrollYProgress, [0.25, 0.5], [0, 1]);
-  const phoneX = useTransform(scrollYProgress, [0.25, 0.5], [200, 0]);
-  const phoneRotate = useTransform(scrollYProgress, [0.25, 0.5, 0.85], [12, -2, -4]);
-  const textOpacity = useTransform(scrollYProgress, [0.15, 0.3, 0.75, 0.9], [0, 1, 1, 0]);
+  const laptopScale = useTransform(scrollYProgress, [0.05, 0.4], [1, 0.85]);
+  const laptopX = useTransform(scrollYProgress, [0.05, 0.4], [0, -100]);
+  const laptopOpacity = useTransform(scrollYProgress, [0.05, 0.4], [1, 0.4]);
+  const phoneOpacity = useTransform(scrollYProgress, [0.1, 0.4], [0, 1]);
+  const phoneX = useTransform(scrollYProgress, [0.1, 0.4], [200, 0]);
+  const phoneRotate = useTransform(scrollYProgress, [0.1, 0.4, 0.85], [12, -2, -4]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.12, 0.85, 1], [0, 1, 1, 0]);
 
   return (
-    <section ref={ref} className="relative" style={{ height: "200vh" }}>
+    <section ref={ref} className="relative" style={{ height: "130vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-10">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16">
           <motion.div style={{ opacity: textOpacity }} className="z-10">
@@ -292,24 +292,24 @@ function Section4Picking() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start start", "end end"]
   });
 
-  const phoneScale = useTransform(scrollYProgress, [0.15, 0.4], [1, 1.25]);
-  const phoneX = useTransform(scrollYProgress, [0.15, 0.4], [0, -50]);
-  const phoneRotate = useTransform(scrollYProgress, [0.15, 0.4], [-4, 0]);
-  const textOpacity = useTransform(scrollYProgress, [0.15, 0.3, 0.75, 0.9], [0, 1, 1, 0]);
+  const phoneScale = useTransform(scrollYProgress, [0.05, 0.3], [1, 1.25]);
+  const phoneX = useTransform(scrollYProgress, [0.05, 0.3], [0, -50]);
+  const phoneRotate = useTransform(scrollYProgress, [0.05, 0.3], [-4, 0]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.12, 0.85, 1], [0, 1, 1, 0]);
 
   const count = useTransform(
     scrollYProgress,
-    [0.35, 0.42, 0.50, 0.58, 0.66],
+    [0.25, 0.35, 0.45, 0.55, 0.65],
     [0, 3, 8, 15, 24]
   );
   const [displayCount, setDisplayCount] = useState(0);
   useMotionValueEvent(count, "change", (v) => setDisplayCount(Math.round(v)));
 
   return (
-    <section ref={ref} className="relative" style={{ height: "220vh" }}>
+    <section ref={ref} className="relative" style={{ height: "140vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-10">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-10 md:grid-cols-[1.4fr_1fr] md:gap-16">
           <div className="relative flex items-center justify-center">
@@ -347,17 +347,17 @@ function Section5SeeAll() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start start", "end end"]
   });
 
-  const phoneX = useTransform(scrollYProgress, [0.15, 0.4], [0, 600]);
-  const phoneOpacity = useTransform(scrollYProgress, [0.15, 0.4], [1, 0]);
-  const laptopScale = useTransform(scrollYProgress, [0.2, 0.5], [0.85, 1.05]);
-  const laptopOpacity = useTransform(scrollYProgress, [0.15, 0.4], [0.4, 1]);
-  const textOpacity = useTransform(scrollYProgress, [0.2, 0.35, 0.75, 0.9], [0, 1, 1, 0]);
+  const phoneX = useTransform(scrollYProgress, [0, 0.3], [0, 600]);
+  const phoneOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const laptopScale = useTransform(scrollYProgress, [0.05, 0.4], [0.85, 1.05]);
+  const laptopOpacity = useTransform(scrollYProgress, [0, 0.3], [0.4, 1]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.15, 0.85, 1], [0, 1, 1, 0]);
 
   return (
-    <section ref={ref} className="relative" style={{ height: "200vh" }}>
+    <section ref={ref} className="relative" style={{ height: "130vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-10">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16">
           <motion.div style={{ opacity: textOpacity }} className="z-10">
@@ -409,20 +409,20 @@ function Section6Finale() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start start", "end end"]
   });
 
-  const laptopScale = useTransform(scrollYProgress, [0.2, 0.5], [0.7, 0.85]);
-  const laptopX = useTransform(scrollYProgress, [0.2, 0.5], [0, -80]);
-  const phoneScale = useTransform(scrollYProgress, [0.25, 0.5], [0.7, 0.85]);
-  const phoneX = useTransform(scrollYProgress, [0.25, 0.5], [200, 60]);
-  const phoneRotate = useTransform(scrollYProgress, [0.25, 0.5], [10, -4]);
-  const phoneOpacity = useTransform(scrollYProgress, [0.25, 0.5], [0, 1]);
-  const textOpacity = useTransform(scrollYProgress, [0.3, 0.55, 0.95], [0, 1, 1]);
-  const ctaY = useTransform(scrollYProgress, [0.55, 0.75], [40, 0]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.3], [0.7, 0.85]);
+  const laptopX = useTransform(scrollYProgress, [0, 0.3], [0, -80]);
+  const phoneScale = useTransform(scrollYProgress, [0, 0.3], [0.7, 0.85]);
+  const phoneX = useTransform(scrollYProgress, [0, 0.3], [200, 60]);
+  const phoneRotate = useTransform(scrollYProgress, [0, 0.3], [10, -4]);
+  const phoneOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.18, 1], [0, 1, 1]);
+  const ctaY = useTransform(scrollYProgress, [0, 0.25], [40, 0]);
 
   return (
-    <section ref={ref} className="relative" style={{ height: "220vh" }}>
+    <section ref={ref} className="relative" style={{ height: "120vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-10">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center text-center">
           <motion.div style={{ opacity: textOpacity, y: ctaY }}>
@@ -696,7 +696,7 @@ function InteractiveHeart({
   index: number;
 }) {
   const pickedIdx = [0, 2, 4].indexOf(index);
-  const heartStart = 0.40 + pickedIdx * 0.04;
+  const heartStart = 0.30 + pickedIdx * 0.05;
   const heartOpacity = useTransform(
     progress,
     [heartStart, heartStart + 0.02],
