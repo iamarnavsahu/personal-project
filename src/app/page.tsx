@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ScrollStory } from "@/components/scroll-story";
+import { Hero } from "@/components/hero";
 
 export default function Home() {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-paper">
-      <ScrollStory />
+    <div className="min-h-screen overflow-x-hidden" style={{ background: "#FAFAF7" }}>
+      <Hero />
       <Footer />
     </div>
   );
@@ -12,7 +12,7 @@ export default function Home() {
 
 function Footer() {
   return (
-    <footer className="border-t border-ink/10 bg-paper">
+    <footer className="border-t border-ink/10">
       <div className="mx-auto max-w-7xl px-6 py-16 md:px-10">
         <div className="grid gap-12 md:grid-cols-[1.5fr_auto_auto]">
           <div>
@@ -25,9 +25,7 @@ function Footer() {
 
           <FooterCol
             title="Product"
-            links={[
-              { label: "Sign in", href: "/admin" }
-            ]}
+            links={[{ label: "Sign in", href: "/admin" }]}
           />
           <FooterCol
             title="Legal"
