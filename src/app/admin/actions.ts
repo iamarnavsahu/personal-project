@@ -82,25 +82,27 @@ export async function uploadPhotos(formData: FormData) {
 export async function updatePasscode(galleryId: string, formData: FormData) {
   const user = await requireUser();
   const passcode = String(formData.get("passcode") || "").trim();
-  if (passcode.length < 4) throw new Error("Passcode must be at least 4 characters");
+  if (passcode.length < 4) return { error: "Passcode must be at least 4 characters" };
 
   const admin = getSupabaseAdmin();
   const { data: gallery } = await admin
     .from("galleries")
-    .select("id")
+    .select("id, slug")
     .eq("id", galleryId)
     .eq("owner_id", user.id)
     .single();
-  if (!gallery) throw new Error("Gallery not found");
+  if (!gallery) return { error: "Gallery not found" };
 
   const passcode_hash = await bcrypt.hash(passcode, 10);
   const { error } = await admin
     .from("galleries")
     .update({ passcode_hash })
     .eq("id", galleryId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath(`/admin/galleries/${galleryId}`);
+  revalidatePath(`/g/${gallery.slug}`);
+  return { ok: true };
 }
 
 export async function deletePhoto(photoId: string) {

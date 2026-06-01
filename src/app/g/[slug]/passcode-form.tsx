@@ -34,9 +34,16 @@ export function PasscodeForm({ slug }: { slug: string }) {
         required
         autoFocus
         placeholder="Passcode"
-        className="input"
+        className={`input ${err ? "border-red-600 focus:border-red-600" : ""}`}
       />
-      {err && <p className="text-sm text-red-600">{err}</p>}
+      {err && (
+        <div
+          role="alert"
+          className="border border-red-600 bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+        >
+          {err}
+        </div>
+      )}
       <button className="btn btn-primary w-full" disabled={pending}>
         {pending ? "Unlocking…" : "Unlock"}
       </button>

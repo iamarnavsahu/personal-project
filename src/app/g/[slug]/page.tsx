@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { PasscodeForm } from "./passcode-form";
 import { ClientGallery } from "./client-gallery";
+import { UnlockIntro } from "./unlock-intro";
 
 export default async function PublicGalleryPage({ params }: { params: { slug: string } }) {
   const admin = getSupabaseAdmin();
@@ -56,13 +57,20 @@ export default async function PublicGalleryPage({ params }: { params: { slug: st
   }));
 
   return (
-    <ClientGallery
-      galleryId={gallery.id}
-      slug={gallery.slug}
-      title={gallery.name}
-      clientName={gallery.client_name}
-      isLocked={gallery.is_locked}
-      photos={items}
-    />
+    <>
+      <UnlockIntro
+        galleryId={gallery.id}
+        title={gallery.name}
+        clientName={gallery.client_name}
+      />
+      <ClientGallery
+        galleryId={gallery.id}
+        slug={gallery.slug}
+        title={gallery.name}
+        clientName={gallery.client_name}
+        isLocked={gallery.is_locked}
+        photos={items}
+      />
+    </>
   );
 }
