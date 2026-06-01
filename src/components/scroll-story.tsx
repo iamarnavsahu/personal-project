@@ -179,7 +179,6 @@ function Section1Upload() {
 
         {/* Flying photos that converge into the laptop */}
         <FlyingPhotos progress={scrollYProgress} />
-        <SectionMarker n={1} total={5} />
       </div>
     </section>
   );
