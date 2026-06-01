@@ -215,7 +215,8 @@ export function ScrollStory() {
             transition={{ delay: 1.7, duration: 1.0, ease: EASE }}
             className="mx-auto mt-10 max-w-lg text-base leading-relaxed text-ink/70 md:text-lg"
           >
-            Upload a gallery. Send one link. Let clients pick what matters.
+            Upload a gallery, send one link, and let people explore, favorite,
+            and discover the moments that matter.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
