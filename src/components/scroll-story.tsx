@@ -514,32 +514,50 @@ function Section5SeeAll() {
 /* ─────────────── SECTION 6 — Final reveal + CTA ─────────────── */
 
 function Section6Finale() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end end"]
-  });
-
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.18, 1], [0, 1, 1]);
-  const titleY = useTransform(scrollYProgress, [0, 0.25], [40, 0]);
-  const titleBlur = useTransform(scrollYProgress, [0, 0.2], ["blur(8px)", "blur(0px)"]);
-
   return (
-    <section ref={ref} className="relative" style={{ height: "120vh" }}>
-      <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-10">
-        <motion.div
-          style={{ opacity: titleOpacity, y: titleY, filter: titleBlur }}
-          className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center text-center"
+    <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-24 md:px-10">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-25%" }}
+        transition={{ duration: 1.0, ease: EASE }}
+        className="mx-auto flex w-full max-w-3xl flex-col items-center text-center"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <motion.img
+          src="/logo.png"
+          alt="Picka."
+          initial={{ opacity: 0, scale: 0.92 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-25%" }}
+          transition={{ duration: 1.0, delay: 0.1, ease: EASE }}
+          className="h-10 w-auto md:h-14"
+        />
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-25%" }}
+          transition={{ duration: 1.0, delay: 0.25, ease: EASE }}
+          className="mt-10 font-serif text-[clamp(2.5rem,7vw,5.5rem)] italic leading-[0.95] tracking-tightest"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Picka." className="h-10 w-auto md:h-14" />
-          <h2 className="mt-10 font-serif text-[clamp(2.5rem,7vw,5.5rem)] italic leading-[0.95] tracking-tightest">
-            A better way <br className="hidden md:block" />
-            to share photos.
-          </h2>
-          <p className="mt-6 max-w-md text-base text-ink/65 md:text-lg">
-            Create beautiful galleries and share them with anyone.
-          </p>
+          A better way <br className="hidden md:block" />
+          to share photos.
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-25%" }}
+          transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
+          className="mt-6 max-w-md text-base text-ink/65 md:text-lg"
+        >
+          Create beautiful galleries and share them with anyone.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-25%" }}
+          transition={{ duration: 0.9, delay: 0.7, ease: EASE }}
+        >
           <Link
             href="/admin"
             className="mt-10 inline-flex items-center gap-3 rounded-full bg-clay px-10 py-5 text-sm font-medium uppercase tracking-[0.2em] text-paper shadow-[0_20px_60px_-20px_rgba(200,100,69,0.45)] transition-all duration-300 hover:scale-[1.04] hover:bg-clay-soft"
@@ -547,7 +565,7 @@ function Section6Finale() {
             Create Gallery <span aria-hidden>→</span>
           </Link>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
