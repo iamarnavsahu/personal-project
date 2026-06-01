@@ -18,7 +18,7 @@ const instrument = Instrument_Serif({
 
 export const metadata: Metadata = {
   title: "Picka — share photos, not files",
-  description: "The modern home for sharing photography. Upload a gallery, share a link — your people browse, search, and choose what speaks to them."
+  description: "A better way to share photos. Upload a gallery, send one link, and let people pick what matters."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

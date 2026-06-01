@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Hero } from "@/components/hero";
+import { ScrollStory } from "@/components/scroll-story";
 
 export default function Home() {
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ background: "#FAFAF7" }}>
       <Hero />
+      <ScrollStory />
       <Footer />
     </div>
   );
@@ -19,13 +21,16 @@ function Footer() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Picka." className="h-7 w-auto opacity-70" />
             <p className="mt-5 max-w-sm font-serif text-lg italic text-ink/60">
-              The modern home for sharing photography.
+              Share photos, not files.
             </p>
           </div>
 
           <FooterCol
             title="Product"
-            links={[{ label: "Sign in", href: "/admin" }]}
+            links={[
+              { label: "Log in", href: "/admin/login" },
+              { label: "Sign up", href: "/admin/login" }
+            ]}
           />
           <FooterCol
             title="Legal"
@@ -38,7 +43,6 @@ function Footer() {
 
         <div className="mt-16 flex flex-wrap items-center justify-between gap-3 border-t border-ink/10 pt-8 text-[10px] uppercase tracking-[0.3em] text-mute">
           <span>Picka. © {new Date().getFullYear()}</span>
-          <span>Share photos, not files.</span>
         </div>
       </div>
     </footer>

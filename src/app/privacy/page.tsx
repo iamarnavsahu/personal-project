@@ -20,9 +20,9 @@ export default function PrivacyPage() {
 
       <div className="mt-12 space-y-6 text-ink/80">
         <p>
-          Picka is the modern home for sharing photography. We try to handle
-          your work, and your people&rsquo;s data, the way photography itself
-          deserves &mdash; with care.
+          Picka is a better way to share photos. We try to handle your work,
+          and your people&rsquo;s data, the way photography itself deserves
+          &mdash; with care.
         </p>
 
         <Section title="What we keep">

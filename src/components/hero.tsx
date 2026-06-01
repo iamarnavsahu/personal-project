@@ -192,12 +192,19 @@ function Nav() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.9, ease: EASE }}
+        className="flex items-center gap-2"
       >
         <Link
-          href="/admin"
-          className="rounded-full border border-ink/15 px-4 py-2 text-[11px] uppercase tracking-[0.3em] text-ink/80 transition-colors hover:border-ink hover:bg-ink hover:text-paper"
+          href="/admin/login"
+          className="rounded-full px-4 py-2 text-[11px] uppercase tracking-[0.3em] text-ink/70 transition-colors hover:text-ink"
         >
-          Sign in
+          Log in
+        </Link>
+        <Link
+          href="/admin/login"
+          className="rounded-full bg-ink px-4 py-2 text-[11px] uppercase tracking-[0.3em] text-paper transition-all hover:bg-clay"
+        >
+          Sign up
         </Link>
       </motion.div>
     </nav>
