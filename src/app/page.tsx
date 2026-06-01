@@ -1,50 +1,10 @@
 import Link from "next/link";
+import { HeroSection } from "@/components/hero-section";
 
 export default function Home() {
   return (
     <div className="min-h-screen overflow-x-hidden">
-      {/* ───────────────────── NAV ───────────────────── */}
-      <nav className="relative z-30 mx-auto flex max-w-7xl items-center justify-between px-6 py-6 md:px-10">
-        <div className="reveal reveal-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Picka." className="h-7 w-auto" />
-        </div>
-        <div className="reveal reveal-2 flex items-center gap-8 text-[11px] uppercase tracking-[0.3em]">
-          <a href="#how" className="hidden text-mute transition hover:text-ink sm:inline">How it works</a>
-          <a href="#why" className="hidden text-mute transition hover:text-ink sm:inline">Why Picka</a>
-          <Link href="/admin" className="text-ink">Sign in</Link>
-        </div>
-      </nav>
-
-      {/* ───────────────────── HERO ───────────────────── */}
-      <section className="relative mx-auto flex min-h-[80vh] max-w-7xl items-center justify-center px-6 py-16 md:px-10 md:py-24">
-        <FloatingCards />
-
-        <div className="relative z-10 mx-auto max-w-3xl text-center">
-          <p className="reveal reveal-3 text-[11px] uppercase tracking-[0.4em] text-mute">
-            The modern home for sharing photography
-          </p>
-
-          <h1 className="mt-6 font-serif text-[clamp(3.5rem,11vw,9rem)] italic leading-[0.9] tracking-tightest">
-            <span className="reveal reveal-4 block">Share photos,</span>
-            <span className="reveal reveal-5 block text-mute">not files.</span>
-          </h1>
-
-          <p className="reveal reveal-6 mx-auto mt-10 max-w-lg text-base leading-relaxed text-ink/70 md:text-lg">
-            Photo delivery, reimagined. Upload a gallery, share a link &mdash;
-            your people browse, search, and choose what speaks to them.
-          </p>
-
-          <div className="reveal reveal-7 mt-12 flex flex-wrap items-center justify-center gap-4">
-            <Link href="/admin" className="btn btn-primary">
-              Start a gallery
-            </Link>
-            <a href="#how" className="btn btn-ghost">
-              See it in action
-            </a>
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* ───────────────────── MARQUEE ───────────────────── */}
       <section className="border-y border-ink/10 bg-ink py-3 text-paper">
@@ -137,10 +97,7 @@ export default function Home() {
             ].map((f) => (
               <li key={f.t} className="bg-paper p-8 md:p-10">
                 <span className="font-serif text-3xl italic text-ink">{f.t}</span>
-                <p
-                  className="mt-4 text-ink/70"
-                  dangerouslySetInnerHTML={{ __html: f.d }}
-                />
+                <p className="mt-4 text-ink/70" dangerouslySetInnerHTML={{ __html: f.d }} />
               </li>
             ))}
           </ul>
@@ -198,36 +155,6 @@ export default function Home() {
           Picka. © {new Date().getFullYear()}
         </div>
       </footer>
-    </div>
-  );
-}
-
-function FloatingCards() {
-  const cards = [
-    { src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=520&fit=crop&q=70",
-      cls: "top-[6%] left-[6%] w-28 md:w-40 -rotate-[8deg] reveal-card reveal-c1" },
-    { src: "https://images.unsplash.com/photo-1604017011826-d3b4c23f8914?w=400&h=400&fit=crop&q=70",
-      cls: "top-[2%] right-[8%] w-32 md:w-44 rotate-[6deg] reveal-card reveal-c2" },
-    { src: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=400&h=560&fit=crop&q=70",
-      cls: "top-[42%] left-[2%] w-24 md:w-36 -rotate-[3deg] reveal-card reveal-c3 hidden sm:block" },
-    { src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=520&fit=crop&q=70",
-      cls: "top-[40%] right-[3%] w-28 md:w-40 rotate-[9deg] reveal-card reveal-c4 hidden sm:block" },
-    { src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=400&fit=crop&q=70",
-      cls: "bottom-[6%] left-[18%] w-24 md:w-32 -rotate-[5deg] reveal-card reveal-c5 hidden md:block" },
-    { src: "https://images.unsplash.com/photo-1583195764036-6dc248ac07d9?w=400&h=480&fit=crop&q=70",
-      cls: "bottom-[8%] right-[20%] w-24 md:w-36 rotate-[4deg] reveal-card reveal-c6 hidden md:block" }
-  ];
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0">
-      {cards.map((c, i) => (
-        <div
-          key={i}
-          className={`absolute overflow-hidden rounded-2xl shadow-[0_30px_60px_-20px_rgba(14,14,16,0.25)] ring-1 ring-ink/5 ${c.cls}`}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={c.src} alt="" className="block h-full w-full object-cover" />
-        </div>
-      ))}
     </div>
   );
 }
