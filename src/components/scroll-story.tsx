@@ -251,7 +251,7 @@ export function ScrollStory() {
           style={{ opacity: counterOpacity }}
           className="absolute bottom-[12%] left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full border border-ink/10 bg-paper/95 px-5 py-3 shadow-lg backdrop-blur"
         >
-          <HeartIcon className="h-4 w-4 text-ink" />
+          <HeartIcon className="h-4 w-4 text-clay" />
           <span className="font-serif text-2xl italic tabular-nums">
             {displayCount}
           </span>
@@ -358,7 +358,7 @@ function ScrollCard({
         {/* Heart badge — appears for picked cards starting at pick phase */}
         <motion.div
           style={{ opacity: heartOpacity, scale: heartScale }}
-          className="absolute -right-2 -top-2 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper shadow-lg ring-2 ring-paper"
+          className="absolute -right-2 -top-2 flex h-9 w-9 items-center justify-center rounded-full bg-clay text-paper shadow-lg ring-2 ring-paper"
           aria-hidden
         >
           <HeartIcon className="h-4 w-4" />

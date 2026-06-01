@@ -8,7 +8,9 @@ export default {
         ink: "#0e0e10",
         paper: "#fafaf7",
         mute: "#6b6b6b",
-        line: "#1a1a1c"
+        line: "#1a1a1c",
+        clay: "#B85B3F",
+        "clay-soft": "#D8836A"
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],

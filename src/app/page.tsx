@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ScrollStory } from "@/components/scroll-story";
+import { PhoneMockup } from "@/components/phone-mockup";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -11,9 +12,47 @@ export default function Home() {
     <div className="min-h-screen overflow-x-hidden bg-paper">
       <ScrollStory />
       <HowItWorks />
+      <FeatureShowcase />
       <FinalCTA />
       <Footer />
     </div>
+  );
+}
+
+/* ─────────────────────── FEATURE SHOWCASE ─────────────────────── */
+
+function FeatureShowcase() {
+  return (
+    <section className="relative flex min-h-screen w-full items-center px-6 py-32 md:px-10">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-16 md:grid-cols-2 md:gap-20">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-20%" }}
+          transition={{ duration: 1.0, ease: EASE }}
+        >
+          <p className="text-[11px] uppercase tracking-[0.4em] text-mute">
+            Designed for the moment
+          </p>
+          <h2 className="mt-5 font-serif text-5xl italic leading-[0.95] tracking-tightest md:text-6xl">
+            A gallery that <br className="hidden md:block" />feels like a film roll.
+          </h2>
+          <p className="mt-8 max-w-md text-base leading-relaxed text-ink/65 md:text-lg">
+            Your people open one link. They see your work full-bleed, beautifully laid
+            out, and they tap to favourite. No accounts, no friction, no instructions
+            needed.
+          </p>
+          <div className="mt-10 flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-mute">
+            <span className="inline-block h-px w-8 bg-clay" />
+            <span className="text-clay">Photography first</span>
+          </div>
+        </motion.div>
+
+        <div className="flex justify-center">
+          <PhoneMockup />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -147,7 +186,7 @@ function FinalCTA() {
         >
           <Link
             href="/admin"
-            className="group inline-flex items-center gap-3 rounded-full bg-ink px-10 py-5 text-sm font-medium uppercase tracking-[0.2em] text-paper shadow-[0_20px_60px_-20px_rgba(14,14,16,0.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_30px_70px_-15px_rgba(14,14,16,0.55)]"
+            className="group inline-flex items-center gap-3 rounded-full bg-clay px-10 py-5 text-sm font-medium uppercase tracking-[0.2em] text-paper shadow-[0_20px_60px_-20px_rgba(184,91,63,0.45)] transition-all duration-300 hover:scale-[1.03] hover:bg-clay-soft hover:shadow-[0_30px_70px_-15px_rgba(184,91,63,0.55)]"
           >
             Start uploading
             <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
