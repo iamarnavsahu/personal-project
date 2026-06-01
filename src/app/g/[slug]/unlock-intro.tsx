@@ -26,14 +26,9 @@ export function UnlockIntro({
     sessionStorage.setItem(key, "1");
 
     setShow(true);
-    const textT = setTimeout(() => setTextIn(true), 800);
-    const fadeT = setTimeout(() => setFadeOut(true), 4200);
-    const doneT = setTimeout(() => setShow(false), 5000);
-    return () => {
-      clearTimeout(textT);
-      clearTimeout(fadeT);
-      clearTimeout(doneT);
-    };
+    setTimeout(() => setTextIn(true), 900);
+    setTimeout(() => setFadeOut(true), 4200);
+    setTimeout(() => setShow(false), 5000);
   }, [galleryId]);
 
   if (!show) return null;
@@ -53,15 +48,15 @@ export function UnlockIntro({
         </div>
 
         <div
-          className={`mt-10 transition-all duration-700 ease-out ${
-            textIn ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+          className={`mt-12 transition-all duration-700 ease-out ${
+            textIn ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
-          <p className="text-[11px] uppercase tracking-[0.32em] text-mute">
+          <p className="text-[11px] uppercase tracking-[0.35em] text-mute">
             Welcome to your gallery,
           </p>
-          <h2 className="mt-3 text-5xl font-bold leading-none tracking-tightest md:text-6xl">
-            {name}
+          <h2 className="mt-4 font-serif text-5xl font-normal italic leading-none tracking-tight md:text-6xl">
+            {name}.
           </h2>
         </div>
       </div>

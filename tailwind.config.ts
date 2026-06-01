@@ -11,8 +11,8 @@ export default {
         line: "#1a1a1c"
       },
       fontFamily: {
-        sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
-        serif: ["ui-serif", "Georgia", "Cambria", "Times New Roman", "serif"]
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "ui-serif", "Georgia", "serif"]
       },
       letterSpacing: {
         tightest: "-0.04em"
