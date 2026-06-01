@@ -10,38 +10,37 @@ export default function Home() {
           <img src="/logo.png" alt="Picka." className="h-7 w-auto" />
         </div>
         <div className="reveal reveal-2 flex items-center gap-8 text-[11px] uppercase tracking-[0.3em]">
-          <a href="#how" className="hidden text-mute transition hover:text-ink sm:inline">Process</a>
+          <a href="#how" className="hidden text-mute transition hover:text-ink sm:inline">How it works</a>
           <a href="#why" className="hidden text-mute transition hover:text-ink sm:inline">Why Picka</a>
           <Link href="/admin" className="text-ink">Sign in</Link>
         </div>
       </nav>
 
       {/* ───────────────────── HERO ───────────────────── */}
-      <section className="relative mx-auto flex min-h-[78vh] max-w-7xl items-center justify-center px-6 py-16 md:px-10 md:py-24">
-        {/* Floating photo cards — desktop only */}
+      <section className="relative mx-auto flex min-h-[80vh] max-w-7xl items-center justify-center px-6 py-16 md:px-10 md:py-24">
         <FloatingCards />
 
-        {/* Centered title block */}
         <div className="relative z-10 mx-auto max-w-3xl text-center">
           <p className="reveal reveal-3 text-[11px] uppercase tracking-[0.4em] text-mute">
-            For photographers
+            The modern home for sharing photography
           </p>
 
           <h1 className="mt-6 font-serif text-[clamp(3.5rem,11vw,9rem)] italic leading-[0.9] tracking-tightest">
-            <span className="reveal reveal-4 block">Your client</span>
-            <span className="reveal reveal-5 block text-mute">picks.</span>
+            <span className="reveal reveal-4 block">Share photos,</span>
+            <span className="reveal reveal-5 block text-mute">not files.</span>
           </h1>
 
-          <p className="reveal reveal-6 mx-auto mt-8 max-w-md font-serif text-lg italic text-ink/70 md:text-xl">
-            You edit only what matters.
+          <p className="reveal reveal-6 mx-auto mt-10 max-w-lg text-base leading-relaxed text-ink/70 md:text-lg">
+            Photo delivery, reimagined. Upload a gallery, share a link &mdash;
+            your people browse, search, and choose what speaks to them.
           </p>
 
           <div className="reveal reveal-7 mt-12 flex flex-wrap items-center justify-center gap-4">
             <Link href="/admin" className="btn btn-primary">
-              Start a shoot
+              Start a gallery
             </Link>
             <a href="#how" className="btn btn-ghost">
-              See the process
+              See it in action
             </a>
           </div>
         </div>
@@ -52,12 +51,12 @@ export default function Home() {
         <div className="flex gap-12 overflow-hidden whitespace-nowrap text-[11px] uppercase tracking-[0.35em]">
           {Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="marquee flex shrink-0 items-center gap-12">
-              <span>Private galleries</span><Dot />
-              <span>Passcode access</span><Dot />
-              <span>Built for grad season</span><Dot />
-              <span>One link · one passcode</span><Dot />
-              <span>No client signup</span><Dot />
-              <span>Free for your first shoot</span><Dot />
+              <span>Photography first</span><Dot />
+              <span>No client signups</span><Dot />
+              <span>One link, infinite moments</span><Dot />
+              <span>Browse · favorite · share</span><Dot />
+              <span>Made for the moment, not the file</span><Dot />
+              <span>For grad season, weddings, all of it</span><Dot />
             </div>
           ))}
         </div>
@@ -67,12 +66,12 @@ export default function Home() {
       <section id="how" className="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
         <div className="grid gap-12 md:grid-cols-[1fr_2fr]">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.35em] text-mute">The process</p>
+            <p className="text-[11px] uppercase tracking-[0.35em] text-mute">How it works</p>
             <h2 className="mt-4 font-serif text-5xl italic leading-[0.95] tracking-tightest md:text-6xl">
-              Three quiet steps.
+              An experience, not a folder.
             </h2>
             <p className="mt-6 max-w-xs text-ink/70">
-              No spreadsheets. No back-and-forth. No app for your client to download.
+              No spreadsheets. No links labeled <em>FINAL_v3</em>. No app for your people to download.
             </p>
           </div>
 
@@ -80,21 +79,21 @@ export default function Home() {
             {[
               {
                 n: "01",
-                t: "Upload your previews",
-                d: "Drag your JPEGs into a fresh gallery. Up to a few hundred at a time. Originals stay on your drive.",
-                detail: "Supabase storage, private bucket"
+                t: "Upload your shoot",
+                d: "Drag your photos into a fresh gallery. They&rsquo;re displayed the way they were meant to be seen.",
+                detail: "Photography first, files second"
               },
               {
                 n: "02",
                 t: "Share one link",
-                d: "Send your client a private URL and a 4-digit passcode. No accounts, no friction. Works on any phone.",
-                detail: "Encrypted passcode · auto-expiring URLs"
+                d: "Send a private URL and a passcode. No accounts. No friction. Opens like a memory on any phone.",
+                detail: "Tap, browse, fall in love"
               },
               {
                 n: "03",
-                t: "Edit only the keepers",
-                d: "When they submit, you see exactly which files to retouch. Skip the rest entirely.",
-                detail: "Filenames ready for Lightroom"
+                t: "Watch them choose",
+                d: "Your people browse, star their favorites, and when they&rsquo;re done you know exactly which moments matter most.",
+                detail: "The keepers, surfaced"
               }
             ].map((s) => (
               <li
@@ -104,7 +103,7 @@ export default function Home() {
                 <div className="font-serif text-3xl italic text-mute md:text-4xl">{s.n}</div>
                 <div>
                   <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">{s.t}</h3>
-                  <p className="mt-3 max-w-xl text-ink/70">{s.d}</p>
+                  <p className="mt-3 max-w-xl text-ink/70" dangerouslySetInnerHTML={{ __html: s.d }} />
                   <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-mute">— {s.detail}</p>
                 </div>
               </li>
@@ -118,18 +117,30 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
           <p className="text-[11px] uppercase tracking-[0.35em] text-mute">Why Picka</p>
           <h2 className="mt-4 max-w-3xl font-serif text-4xl italic leading-[1.05] tracking-tightest md:text-6xl">
-            Built for photographers who&rsquo;d rather be shooting.
+            Photography is the hero. Everything else stays out of the way.
           </h2>
 
           <ul className="mt-16 grid gap-px bg-ink/10 md:grid-cols-3">
             {[
-              { t: "Stays private.", d: "Photos live in a private bucket. URLs are signed and expire. Nothing is indexable." },
-              { t: "Stays simple.", d: "Your client taps a link, enters a passcode, taps stars. That&rsquo;s the whole flow." },
-              { t: "Stays yours.",   d: "No watermarks on the admin. No upsells. Your originals never leave your machine." }
+              {
+                t: "Designed to feel.",
+                d: "Galleries that breathe. Full-bleed photos. No clutter, no chrome, no UI getting in the way of the work."
+              },
+              {
+                t: "Designed to share.",
+                d: "One link is the whole experience. No app, no account, no learning curve &mdash; your people just tap and arrive."
+              },
+              {
+                t: "Designed for you.",
+                d: "Private by default. Your originals never leave your machine. Your galleries, your client list, your work."
+              }
             ].map((f) => (
               <li key={f.t} className="bg-paper p-8 md:p-10">
                 <span className="font-serif text-3xl italic text-ink">{f.t}</span>
-                <p className="mt-4 text-ink/70" dangerouslySetInnerHTML={{ __html: f.d }} />
+                <p
+                  className="mt-4 text-ink/70"
+                  dangerouslySetInnerHTML={{ __html: f.d }}
+                />
               </li>
             ))}
           </ul>
@@ -140,46 +151,51 @@ export default function Home() {
       <section className="border-t border-ink/10 bg-ink text-paper">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-6 py-20 md:flex-row md:items-center md:px-10 md:py-24">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.35em] text-paper/50">Ready when you are</p>
+            <p className="text-[11px] uppercase tracking-[0.35em] text-paper/50">
+              For your next shoot
+            </p>
             <h3 className="mt-3 font-serif text-4xl italic leading-tight tracking-tightest md:text-5xl">
-              Your next shoot starts here.
+              Make the gallery a moment, <br className="hidden md:block" />
+              not a download.
             </h3>
           </div>
           <Link
             href="/admin"
             className="inline-flex items-center gap-3 border border-paper px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] transition hover:bg-paper hover:text-ink"
           >
-            Start uploading <span aria-hidden>→</span>
+            Start a gallery <span aria-hidden>→</span>
           </Link>
         </div>
       </section>
 
       {/* ───────────────────── FOOTER ───────────────────── */}
       <footer className="mx-auto max-w-7xl px-6 py-12 md:px-10 md:py-16">
-        <div className="grid gap-10 border-t border-ink/10 pt-10 md:grid-cols-[1fr_auto_auto_auto]">
+        <div className="grid gap-10 border-t border-ink/10 pt-10 md:grid-cols-[1.5fr_auto_auto]">
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Picka." className="h-7 w-auto opacity-50" />
-            <p className="mt-3 max-w-xs text-sm text-ink/60">
-              A small, private tool for photographers who care.
+            <img src="/logo.png" alt="Picka." className="h-7 w-auto opacity-60" />
+            <p className="mt-4 max-w-xs font-serif text-lg italic text-ink/60">
+              The modern home for sharing photography.
             </p>
           </div>
-          <FooterCol title="Product" links={[
-            { label: "How it works", href: "#how" },
-            { label: "Why Picka", href: "#why" },
-            { label: "Sign in", href: "/admin" }
-          ]} />
-          <FooterCol title="Legal" links={[
-            { label: "Privacy policy", href: "/privacy" },
-            { label: "Terms of use", href: "/terms" }
-          ]} />
-          <FooterCol title="Contact" links={[
-            { label: "asahu@ucsd.edu", href: "mailto:asahu@ucsd.edu" }
-          ]} />
+          <FooterCol
+            title="Product"
+            links={[
+              { label: "How it works", href: "#how" },
+              { label: "Why Picka", href: "#why" },
+              { label: "Sign in", href: "/admin" }
+            ]}
+          />
+          <FooterCol
+            title="Legal"
+            links={[
+              { label: "Privacy", href: "/privacy" },
+              { label: "Terms", href: "/terms" }
+            ]}
+          />
         </div>
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 text-[10px] uppercase tracking-[0.3em] text-mute">
-          <span>Picka. © {new Date().getFullYear()}</span>
-          <span>Built quietly in San Diego.</span>
+        <div className="mt-10 text-[10px] uppercase tracking-[0.3em] text-mute">
+          Picka. © {new Date().getFullYear()}
         </div>
       </footer>
     </div>
@@ -204,7 +220,10 @@ function FloatingCards() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
       {cards.map((c, i) => (
-        <div key={i} className={`absolute overflow-hidden rounded-2xl shadow-[0_30px_60px_-20px_rgba(14,14,16,0.25)] ring-1 ring-ink/5 ${c.cls}`}>
+        <div
+          key={i}
+          className={`absolute overflow-hidden rounded-2xl shadow-[0_30px_60px_-20px_rgba(14,14,16,0.25)] ring-1 ring-ink/5 ${c.cls}`}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={c.src} alt="" className="block h-full w-full object-cover" />
         </div>

@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy — Picka",
-  description: "How Picka handles your photos and your client's data."
+  title: "Privacy — Picka",
+  description: "How Picka handles your photos and your people's privacy."
 };
 
 export default function PrivacyPage() {
@@ -18,38 +18,39 @@ export default function PrivacyPage() {
         Privacy.
       </h1>
 
-      <div className="prose-picka mt-12 space-y-6 text-ink/80">
+      <div className="mt-12 space-y-6 text-ink/80">
         <p>
-          Picka is a small tool built by one photographer for other photographers.
-          We try to handle your work, and your client&rsquo;s privacy, the way we&rsquo;d
-          want our own handled.
+          Picka is the modern home for sharing photography. We try to handle
+          your work, and your people&rsquo;s data, the way photography itself
+          deserves &mdash; with care.
         </p>
 
-        <Section title="What we store">
+        <Section title="What we keep">
           <p>
-            When you sign in we store your email and an encrypted password. When you
-            create a gallery we store its name, your client&rsquo;s name (if you set one),
-            a bcrypt-hashed passcode, and the JPEGs you upload. That&rsquo;s it.
+            When you sign in we store your email and an encrypted password.
+            When you create a gallery we store its name, the name of whoever
+            you&rsquo;re sharing with (if you set one), an encrypted passcode,
+            and the photos you upload. That&rsquo;s the list.
           </p>
         </Section>
 
         <Section title="Where photos live">
           <p>
-            Uploads sit in a private Supabase storage bucket. They are never publicly
-            indexable. Your client sees them via signed URLs that expire after one
-            hour and are regenerated each visit.
+            Uploads sit in private, encrypted storage. They are never publicly
+            indexable. Whoever you share with sees them through signed URLs
+            that expire after one hour and refresh on each visit.
           </p>
         </Section>
 
-        <Section title="What clients see">
+        <Section title="What your people see">
           <p>
-            Clients see only the gallery you shared, after entering the passcode. They
-            do not sign up, do not create an account, and cannot see any other shoot.
-            We store the photos they pick, nothing else about them.
+            Only the gallery you shared, after entering the passcode. No
+            account, no sign up, and no view into any other shoot. We store
+            the photos they choose &mdash; nothing else about them.
           </p>
         </Section>
 
-        <Section title="What we do not do">
+        <Section title="What we never do">
           <ul className="ml-6 list-disc space-y-2">
             <li>We do not sell, share, or rent your data.</li>
             <li>We do not train AI models on your photos.</li>
@@ -60,30 +61,17 @@ export default function PrivacyPage() {
 
         <Section title="Deletion">
           <p>
-            Delete any gallery from the admin and the photos plus their selections
-            are wiped from storage immediately. Email{" "}
-            <a href="mailto:asahu@ucsd.edu" className="underline">
-              asahu@ucsd.edu
-            </a>{" "}
-            to fully delete your account.
+            Delete a gallery from the admin and the photos and selections are
+            wiped immediately. Reach out from the dashboard to fully delete
+            your account.
           </p>
         </Section>
 
         <Section title="Cookies">
           <p>
-            Two cookies: one keeps you signed in on the admin side, one remembers
-            that your client has entered the correct passcode. Both are httpOnly and
-            sameSite=lax. No analytics cookies.
-          </p>
-        </Section>
-
-        <Section title="Questions">
-          <p>
-            Email{" "}
-            <a href="mailto:asahu@ucsd.edu" className="underline">
-              asahu@ucsd.edu
-            </a>
-            . A real person will read it.
+            Two cookies. One keeps you signed in on the admin side. One
+            remembers that your visitor entered the correct passcode for a
+            gallery. Both are httpOnly and sameSite=lax. No analytics cookies.
           </p>
         </Section>
       </div>

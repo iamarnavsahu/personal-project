@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Terms of Use — Picka",
+  title: "Terms — Picka",
   description: "Plain-English terms for using Picka."
 };
 
@@ -20,44 +20,45 @@ export default function TermsPage() {
 
       <div className="mt-12 space-y-8 text-ink/80">
         <p>
-          Picka is offered as-is. By using it you agree to the following, written
-          in plain English so we both understand them.
+          Picka is offered as-is. By using it you agree to the following,
+          written in plain English so we both understand it.
         </p>
 
-        <Section title="What you upload">
+        <Section title="Your work">
           <p>
-            You retain all rights to the photos you upload. By uploading you grant
-            Picka a limited license to store and display them to clients you share
-            galleries with. Nothing more.
+            You retain every right to the photos you upload. By uploading you
+            grant Picka a limited license to store and display them to the
+            people you choose to share with. Nothing more.
           </p>
         </Section>
 
         <Section title="What you cannot upload">
           <p>
-            No content you do not own or are not licensed to display. No illegal
-            content. No content depicting minors in any compromising way.
+            No content you do not own or are not licensed to display. No
+            illegal content. No content depicting minors in any compromising
+            way.
           </p>
         </Section>
 
         <Section title="Availability">
           <p>
-            Picka is a small product and may have downtime. We try our best. Do not
-            rely on it as your only copy of the photos &mdash; keep originals on your
-            own drive.
+            Picka is a small product and may have downtime. We try our best.
+            Do not rely on it as your only copy of your work &mdash; keep
+            originals on your own drive.
           </p>
         </Section>
 
         <Section title="Termination">
           <p>
-            We may suspend accounts that abuse the service. You may delete your
-            account at any time.
+            We may suspend accounts that abuse the service. You may delete
+            your account at any time.
           </p>
         </Section>
 
         <Section title="Changes">
           <p>
-            We may update these terms. Material changes will be announced in the
-            admin dashboard.
+            We may update these terms. Material changes will be announced
+            inside your admin.
           </p>
         </Section>
       </div>
