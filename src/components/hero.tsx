@@ -39,7 +39,7 @@ const CARDS: Card[] = [
     rotate: -3, depth: 18, blur: 2, opacity: 0.92, floatDur: 9
   },
   {
-    src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=420&h=540&fit=crop&q=75",
+    src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=420&h=540&fit=crop&q=75",
     cls: "top-[36%] right-[2%] w-28 md:w-40",
     rotate: 4, depth: 22, blur: 0, opacity: 1, floatDur: 7.5
   },
@@ -49,17 +49,17 @@ const CARDS: Card[] = [
     rotate: 7, depth: 24, blur: 1, opacity: 0.95, floatDur: 8.5
   },
   {
-    src: "https://images.unsplash.com/photo-1530268729831-4b0b9e170218?w=420&h=540&fit=crop&q=75",
+    src: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=420&h=440&fit=crop&q=75",
     cls: "bottom-[8%] right-[16%] w-28 md:w-40",
     rotate: -5, depth: 28, blur: 0, opacity: 1, floatDur: 6.5
   },
   {
-    src: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=420&h=520&fit=crop&q=75",
+    src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=420&h=520&fit=crop&q=75",
     cls: "top-[20%] left-[38%] w-20 md:w-28",
     rotate: 9, depth: 14, blur: 4, opacity: 0.5, floatDur: 10
   },
   {
-    src: "https://images.unsplash.com/photo-1571987502227-9231b837d92a?w=420&h=520&fit=crop&q=75",
+    src: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=420&h=520&fit=crop&q=75",
     cls: "bottom-[24%] right-[38%] w-20 md:w-28",
     rotate: -7, depth: 16, blur: 3, opacity: 0.55, floatDur: 9.5
   }

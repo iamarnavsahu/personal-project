@@ -412,53 +412,33 @@ function Section6Finale() {
     offset: ["start start", "end end"]
   });
 
-  const laptopScale = useTransform(scrollYProgress, [0, 0.3], [0.7, 0.85]);
-  const laptopX = useTransform(scrollYProgress, [0, 0.3], [0, -80]);
-  const phoneScale = useTransform(scrollYProgress, [0, 0.3], [0.7, 0.85]);
-  const phoneX = useTransform(scrollYProgress, [0, 0.3], [200, 60]);
-  const phoneRotate = useTransform(scrollYProgress, [0, 0.3], [10, -4]);
-  const phoneOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.18, 1], [0, 1, 1]);
-  const ctaY = useTransform(scrollYProgress, [0, 0.25], [40, 0]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.18, 1], [0, 1, 1]);
+  const titleY = useTransform(scrollYProgress, [0, 0.25], [40, 0]);
+  const titleBlur = useTransform(scrollYProgress, [0, 0.2], ["blur(8px)", "blur(0px)"]);
 
   return (
     <section ref={ref} className="relative" style={{ height: "120vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-10">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center text-center">
-          <motion.div style={{ opacity: textOpacity, y: ctaY }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Picka." className="mx-auto h-10 w-auto md:h-14" />
-            <h2 className="mt-8 font-serif text-[clamp(2.25rem,6vw,5rem)] italic leading-[0.95] tracking-tightest">
-              A better way to share photos.
-            </h2>
-            <p className="mt-6 max-w-md text-base text-ink/65">
-              Create beautiful galleries and share them with anyone.
-            </p>
-            <Link
-              href="/admin"
-              className="mt-10 inline-flex items-center gap-3 rounded-full bg-clay px-10 py-5 text-sm font-medium uppercase tracking-[0.2em] text-paper shadow-[0_20px_60px_-20px_rgba(200,100,69,0.45)] transition-all duration-300 hover:scale-[1.04] hover:bg-clay-soft"
-            >
-              Create Gallery <span aria-hidden>→</span>
-            </Link>
-          </motion.div>
-
-          {/* Backdrop laptop + phone composition */}
-          <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center opacity-30">
-            <motion.div style={{ scale: laptopScale, x: laptopX }} className="origin-center">
-              <LaptopFrame>
-                <CreatorView progress={scrollYProgress} mode="picks" />
-              </LaptopFrame>
-            </motion.div>
-            <motion.div
-              style={{ scale: phoneScale, x: phoneX, rotate: phoneRotate, opacity: phoneOpacity }}
-              className="absolute"
-            >
-              <PhoneFrame>
-                <ClientView count={24} />
-              </PhoneFrame>
-            </motion.div>
-          </div>
-        </div>
+        <motion.div
+          style={{ opacity: titleOpacity, y: titleY, filter: titleBlur }}
+          className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center text-center"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Picka." className="h-10 w-auto md:h-14" />
+          <h2 className="mt-10 font-serif text-[clamp(2.5rem,7vw,5.5rem)] italic leading-[0.95] tracking-tightest">
+            A better way <br className="hidden md:block" />
+            to share photos.
+          </h2>
+          <p className="mt-6 max-w-md text-base text-ink/65 md:text-lg">
+            Create beautiful galleries and share them with anyone.
+          </p>
+          <Link
+            href="/admin"
+            className="mt-10 inline-flex items-center gap-3 rounded-full bg-clay px-10 py-5 text-sm font-medium uppercase tracking-[0.2em] text-paper shadow-[0_20px_60px_-20px_rgba(200,100,69,0.45)] transition-all duration-300 hover:scale-[1.04] hover:bg-clay-soft"
+          >
+            Create Gallery <span aria-hidden>→</span>
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
