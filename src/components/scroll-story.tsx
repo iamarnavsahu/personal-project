@@ -30,8 +30,116 @@ export function ScrollStory() {
       <Section3PhoneView />
       <Section4Picking />
       <Section5SeeAll />
+      <HowItWorksCards />
       <Section6Finale />
     </>
+  );
+}
+
+/* ─────────────── HOW IT WORKS — 3 cards (Diem-style) ─────────────── */
+
+function HowItWorksCards() {
+  const STEPS = [
+    {
+      title: "Upload",
+      body: "Drag your photos into a private gallery. PICKA lays them out beautifully.",
+      Icon: UploadIcon
+    },
+    {
+      title: "Share",
+      body: "Send one link and a passcode. No apps. No accounts. Anyone can open it.",
+      Icon: ShareIcon
+    },
+    {
+      title: "Discover",
+      body: "Your people heart their favourites. You see exactly what to deliver.",
+      Icon: HeartIcon
+    }
+  ];
+  return (
+    <section className="relative flex min-h-screen flex-col items-center justify-center px-6 py-24 md:px-10">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-20%" }}
+        transition={{ duration: 1.0, ease: EASE }}
+        className="text-center"
+      >
+        <p className="text-[11px] uppercase tracking-[0.4em] text-mute">How it works</p>
+        <h2 className="mt-4 font-serif text-5xl italic leading-[0.95] tracking-tightest md:text-7xl">
+          Three quiet steps.
+        </h2>
+      </motion.div>
+
+      <div className="mt-16 grid w-full max-w-6xl gap-6 md:grid-cols-3 md:gap-8">
+        {STEPS.map((step, i) => (
+          <motion.article
+            key={step.title}
+            initial={{ opacity: 0, y: 50, filter: "blur(6px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true, margin: "-15%" }}
+            transition={{ duration: 1.1, ease: EASE, delay: 0.1 + i * 0.15 }}
+            className="group relative flex flex-col rounded-3xl border border-ink/10 bg-paper p-8 transition-all duration-500 hover:-translate-y-1 hover:border-clay/40 hover:shadow-[0_30px_60px_-30px_rgba(200,100,69,0.35)] md:p-10"
+          >
+            <div className="mb-8 flex h-11 w-11 items-center justify-center rounded-full bg-ink/[0.04] transition-colors duration-500 group-hover:bg-clay group-hover:text-paper">
+              <step.Icon />
+            </div>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-mute">
+              {String(i + 1).padStart(2, "0")}
+            </p>
+            <h3 className="mt-2 font-serif text-3xl italic leading-tight tracking-tight">
+              {step.title}
+            </h3>
+            <p className="mt-4 text-ink/65 leading-relaxed">{step.body}</p>
+          </motion.article>
+        ))}
+      </div>
+
+      <ScrollHint />
+    </section>
+  );
+}
+
+function ScrollHint() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.8, duration: 0.8 }}
+      className="mt-20 flex flex-col items-center gap-1 text-[10px] uppercase tracking-[0.4em] text-mute"
+      aria-hidden
+    >
+      <span>Scroll</span>
+      <motion.span
+        animate={{ y: [0, 6, 0] }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+      >
+        ↓
+      </motion.span>
+    </motion.div>
+  );
+}
+
+function UploadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M12 16V4M6 10l6-6 6 6M4 20h16" />
+    </svg>
+  );
+}
+function ShareIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M10 14l-5 5M5 14h5v5M14 10l5-5M19 10V5h-5" />
+    </svg>
+  );
+}
+function HeartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
+    </svg>
   );
 }
 
@@ -71,6 +179,7 @@ function Section1Upload() {
 
         {/* Flying photos that converge into the laptop */}
         <FlyingPhotos progress={scrollYProgress} />
+        <SectionMarker n={1} total={5} />
       </div>
     </section>
   );

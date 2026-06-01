@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 
@@ -38,7 +39,17 @@ export default function LoginPage() {
           <input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div>
-          <label className="label">Password</label>
+          <div className="flex items-baseline justify-between">
+            <label className="label">Password</label>
+            {mode === "login" && (
+              <Link
+                href="/admin/forgot-password"
+                className="text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-ink"
+              >
+                Forgot?
+              </Link>
+            )}
+          </div>
           <input className="input" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         {err && <p className="text-sm text-red-600">{err}</p>}
