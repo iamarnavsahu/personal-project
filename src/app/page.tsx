@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { HeroSection } from "@/components/hero-section";
+import { ScrollStory } from "@/components/scroll-story";
 
 export default function Home() {
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <HeroSection />
+      <ScrollStory />
 
       {/* ───────────────────── MARQUEE ───────────────────── */}
       <section className="border-y border-ink/10 bg-ink py-3 text-paper">
