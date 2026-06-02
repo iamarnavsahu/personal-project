@@ -162,7 +162,7 @@ function Section3Browse() {
             className="absolute right-[5%] top-1/2 z-30 -translate-y-1/2 md:right-[10%]"
           >
             <PhoneFrame>
-              <ClientView count={0} progress={scrollYProgress} pickStartProgress={1.5} />
+              <ClientViewStatic count={0} />
             </PhoneFrame>
           </motion.div>
         </div>
@@ -209,7 +209,7 @@ function Section4Pick() {
           className="origin-center"
         >
           <PhoneFrame>
-            <ClientView count={displayCount} progress={scrollYProgress} pickStartProgress={0.30} />
+            <ClientViewInteractive count={displayCount} progress={scrollYProgress} pickStartProgress={0.30} />
           </PhoneFrame>
         </motion.div>
 
@@ -686,16 +686,14 @@ function LaptopPhoto({
   );
 }
 
-/* ─────────────── Client (phone) view ─────────────── */
+/* ─────────────── Client (phone) views ─────────────── */
 
-function ClientView({
+function ClientViewShell({
   count,
-  progress,
-  pickStartProgress
+  children
 }: {
   count: number;
-  progress: MotionValue<number>;
-  pickStartProgress: number;
+  children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col">
@@ -712,20 +710,7 @@ function ClientView({
           <span className="text-[8px] font-semibold tabular-nums text-clay">{count}</span>
         </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-1 p-1.5">
-        {PHOTOS.map((src, i) => (
-          <PhonePhoto
-            key={i}
-            src={src}
-            index={i}
-            progress={progress}
-            pickStartProgress={pickStartProgress}
-            picked={PICKED_SET.has(i)}
-          />
-        ))}
-      </div>
-
+      <div className="grid grid-cols-2 gap-1 p-1.5">{children}</div>
       <div className="border-t border-ink/10 p-2">
         <div className="rounded-full bg-ink py-1.5 text-center text-[8px] font-semibold uppercase tracking-widest text-paper">
           Send picks →
@@ -735,7 +720,47 @@ function ClientView({
   );
 }
 
-function PhonePhoto({
+/* Used in Section 3 (browse) — no scroll-driven motion, just the layout */
+function ClientViewStatic({ count }: { count: number }) {
+  return (
+    <ClientViewShell count={count}>
+      {PHOTOS.map((src, i) => (
+        <div key={i} className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={src} alt="" loading="eager" className="block aspect-square rounded-md object-cover" />
+        </div>
+      ))}
+    </ClientViewShell>
+  );
+}
+
+/* Used in Section 4 (pick) — hearts pop, photos dim */
+function ClientViewInteractive({
+  count,
+  progress,
+  pickStartProgress
+}: {
+  count: number;
+  progress: MotionValue<number>;
+  pickStartProgress: number;
+}) {
+  return (
+    <ClientViewShell count={count}>
+      {PHOTOS.map((src, i) => (
+        <PhonePhotoInteractive
+          key={i}
+          src={src}
+          index={i}
+          progress={progress}
+          pickStartProgress={pickStartProgress}
+          picked={PICKED_SET.has(i)}
+        />
+      ))}
+    </ClientViewShell>
+  );
+}
+
+function PhonePhotoInteractive({
   src,
   index,
   progress,
@@ -748,50 +773,72 @@ function PhonePhoto({
   pickStartProgress: number;
   picked: boolean;
 }) {
-  const pickedOrder = picked ? PICKED_INDEXES.indexOf(index) : -1;
-  const heartStart = picked ? pickStartProgress + pickedOrder * 0.08 : 0;
-  const heartOpacity = useTransform(
-    progress,
-    picked ? [heartStart, heartStart + 0.04] : [0, 1],
-    picked ? [0, 1] : [0, 0]
-  );
-  const heartScale = useTransform(
-    progress,
-    picked ? [heartStart, heartStart + 0.025, heartStart + 0.06] : [0, 1],
-    picked ? [0.3, 1.3, 1] : [0, 0]
-  );
+  if (!picked) {
+    return <PhonePhotoUnpicked src={src} progress={progress} pickStartProgress={pickStartProgress} />;
+  }
+  return <PhonePhotoPicked src={src} index={index} progress={progress} pickStartProgress={pickStartProgress} />;
+}
+
+function PhonePhotoUnpicked({
+  src,
+  progress,
+  pickStartProgress
+}: {
+  src: string;
+  progress: MotionValue<number>;
+  pickStartProgress: number;
+}) {
   const dimOpacity = useTransform(
     progress,
     [pickStartProgress + 0.1, pickStartProgress + 0.2],
-    picked ? [1, 1] : [1, 0.45]
+    [1, 0.45]
   );
-  const ringOpacity = useTransform(
-    progress,
-    picked ? [heartStart, heartStart + 0.04] : [0, 1],
-    picked ? [0, 1] : [0, 0]
-  );
-
   return (
     <motion.div style={{ opacity: dimOpacity }} className="relative">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" loading="eager" className="block aspect-square rounded-md object-cover" />
-      {picked && (
-        <motion.span
-          style={{ opacity: ringOpacity }}
-          className="pointer-events-none absolute inset-0 rounded-md ring-2 ring-clay"
-          aria-hidden
-        />
-      )}
-      {picked && (
-        <motion.div
-          style={{ opacity: heartOpacity, scale: heartScale }}
-          className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-clay text-paper shadow ring-1 ring-paper"
-          aria-hidden
-        >
-          <HeartGlyph className="h-2 w-2" />
-        </motion.div>
-      )}
     </motion.div>
+  );
+}
+
+function PhonePhotoPicked({
+  src,
+  index,
+  progress,
+  pickStartProgress
+}: {
+  src: string;
+  index: number;
+  progress: MotionValue<number>;
+  pickStartProgress: number;
+}) {
+  const pickedOrder = PICKED_INDEXES.indexOf(index);
+  const heartStart = pickStartProgress + pickedOrder * 0.08;
+  const heartOpacity = useTransform(progress, [heartStart, heartStart + 0.04], [0, 1]);
+  const heartScale = useTransform(
+    progress,
+    [heartStart, heartStart + 0.025, heartStart + 0.06],
+    [0.3, 1.3, 1]
+  );
+  const ringOpacity = useTransform(progress, [heartStart, heartStart + 0.04], [0, 1]);
+
+  return (
+    <div className="relative">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" loading="eager" className="block aspect-square rounded-md object-cover" />
+      <motion.span
+        style={{ opacity: ringOpacity }}
+        className="pointer-events-none absolute inset-0 rounded-md ring-2 ring-clay"
+        aria-hidden
+      />
+      <motion.div
+        style={{ opacity: heartOpacity, scale: heartScale }}
+        className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-clay text-paper shadow ring-1 ring-paper"
+        aria-hidden
+      >
+        <HeartGlyph className="h-2 w-2" />
+      </motion.div>
+    </div>
   );
 }
 
