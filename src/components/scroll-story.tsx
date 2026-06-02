@@ -28,12 +28,13 @@ type Act = "upload" | "share" | "browse" | "pick" | "see" | "reveal";
 
 const ACT_AT: Array<[number, Act]> = [
   [0.00, "upload"],
-  [0.17, "share"],
+  [0.16, "share"],
   [0.34, "browse"],
-  [0.50, "pick"],
-  [0.68, "see"],
-  [0.86, "reveal"]
+  [0.52, "pick"],
+  [0.72, "see"],
+  [0.88, "reveal"]
 ];
+const ACT_ORDER: Act[] = ["upload", "share", "browse", "pick", "see", "reveal"];
 
 function pickAct(p: number): Act {
   let current: Act = "upload";
@@ -60,61 +61,61 @@ function ProductStory() {
     if (next !== act) setAct(next);
   });
 
-  /* Laptop fades + zooms in by 0.10, stays present, repositions per act */
+  /* Laptop fades + zooms in by 0.08, stays present, repositions per act */
   const laptopScale = useTransform(
     scrollYProgress,
-    [0,    0.10, 0.17, 0.34, 0.50, 0.68, 0.86, 1.00],
-    [0.82, 0.96, 1.00, 1.00, 0.88, 1.04, 0.86, 0.86]
+    [0,    0.08, 0.16, 0.34, 0.52, 0.72, 0.88, 1.00],
+    [0.78, 0.94, 1.02, 1.02, 0.84, 1.06, 0.84, 0.84]
   );
-  const laptopY = useTransform(scrollYProgress, [0, 0.08], [40, 0]);
-  const laptopOpacity = useTransform(scrollYProgress, [0, 0.08, 0.10], [0, 0.4, 1]);
+  const laptopY = useTransform(scrollYProgress, [0, 0.08], [50, 0]);
+  const laptopOpacity = useTransform(scrollYProgress, [0, 0.06, 0.10], [0, 0.5, 1]);
   const laptopX = useTransform(
     scrollYProgress,
-    [0.17, 0.30, 0.34, 0.50, 0.68, 0.86, 1.00],
-    [0,    -100, -100, -120, 0,    -140, -140]
+    [0.16, 0.28, 0.34, 0.52, 0.72, 0.88, 1.00],
+    [0,    -140, -140, -160, 0,    -180, -180]
   );
   const laptopRotate = useTransform(
     scrollYProgress,
-    [0.68, 0.74, 0.86],
-    [0, -2, -2]
+    [0.72, 0.80, 0.88],
+    [0, -3, -3]
   );
 
   /* Phone enters at browse, leaves at see, comes back at reveal */
   const phoneOpacity = useTransform(
     scrollYProgress,
-    [0.34, 0.42, 0.66, 0.74, 0.86, 0.92],
+    [0.34, 0.44, 0.70, 0.78, 0.88, 0.94],
     [0,    1,    1,    0,    1,    1]
   );
   const phoneX = useTransform(
     scrollYProgress,
-    [0.34, 0.42, 0.50, 0.66, 0.86, 1.00],
-    [260,  0,    -40,  -40,  140,  140]
+    [0.34, 0.44, 0.52, 0.70, 0.88, 1.00],
+    [280,  20,   -20,  -20,  180,  180]
   );
   const phoneScale = useTransform(
     scrollYProgress,
-    [0.34, 0.42, 0.50, 0.66, 0.86, 1.00],
-    [0.82, 0.92, 1.10, 1.10, 0.86, 0.86]
+    [0.34, 0.44, 0.52, 0.70, 0.88, 1.00],
+    [0.80, 0.92, 1.15, 1.15, 0.84, 0.84]
   );
   const phoneRotate = useTransform(
     scrollYProgress,
-    [0.34, 0.42, 0.50, 0.86],
-    [12,   -2,   0,    -3]
+    [0.34, 0.44, 0.52, 0.88],
+    [14,   -2,   0,    -4]
   );
 
-  /* Share panel (act share, 0.17 - 0.34) */
+  /* Share panel (act share, 0.16 - 0.34) — make it linger longer */
   const panelOpacity = useTransform(
     scrollYProgress,
-    [0.17, 0.22, 0.30, 0.34],
+    [0.16, 0.20, 0.32, 0.34],
     [0, 1, 1, 0]
   );
-  const panelX = useTransform(scrollYProgress, [0.17, 0.22], [60, 0]);
-  const passwordOn = useTransform(scrollYProgress, [0.24, 0.27], [0, 1]);
-  const copied = useTransform(scrollYProgress, [0.29, 0.32], [0, 1]);
+  const panelX = useTransform(scrollYProgress, [0.16, 0.22], [80, 0]);
+  const passwordOn = useTransform(scrollYProgress, [0.23, 0.26], [0, 1]);
+  const copied = useTransform(scrollYProgress, [0.28, 0.31], [0, 1]);
 
-  /* Counter (pick act, 0.50 - 0.68) */
+  /* Counter (pick act, 0.52 - 0.72) */
   const count = useTransform(
     scrollYProgress,
-    [0.50, 0.54, 0.58, 0.62, 0.66],
+    [0.52, 0.56, 0.60, 0.64, 0.68],
     [0, 3, 8, 15, 24]
   );
   const [displayCount, setDisplayCount] = useState(0);
@@ -127,15 +128,15 @@ function ProductStory() {
     [0, 1, 1, 0]
   );
 
-  /* Action buttons (see act, 0.68 - 0.86) */
+  /* Action buttons (see act, 0.72 - 0.88) */
   const actionsOpacity = useTransform(
     scrollYProgress,
-    [0.72, 0.76, 0.84, 0.88],
+    [0.74, 0.78, 0.86, 0.90],
     [0, 1, 1, 0]
   );
 
   return (
-    <div ref={ref} className="relative" style={{ height: "700vh" }}>
+    <div ref={ref} className="relative" style={{ height: "850vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
         {/* Flying photos converge into the laptop */}
         <FlyingPhotos opacity={flyOpacity} progress={scrollYProgress} />
@@ -243,14 +244,20 @@ function ProductStory() {
           </AnimatePresence>
         </div>
 
-        {/* Scroll affordance */}
-        <div className="pointer-events-none absolute bottom-6 left-1/2 z-40 -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.4em] text-mute">
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          >
-            Scroll
-          </motion.div>
+        {/* Section progress dots */}
+        <div className="pointer-events-none absolute bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2">
+          {ACT_ORDER.map((a, i) => (
+            <span
+              key={a}
+              className={`h-1.5 rounded-full transition-all duration-500 ${
+                a === act ? "w-8 bg-clay" : "w-1.5 bg-ink/20"
+              }`}
+              aria-hidden
+            />
+          ))}
+          <span className="ml-3 text-[10px] uppercase tracking-[0.35em] text-mute tabular-nums">
+            {String(ACT_ORDER.indexOf(act) + 1).padStart(2, "0")} / 06
+          </span>
         </div>
       </div>
     </div>
