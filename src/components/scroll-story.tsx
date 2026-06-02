@@ -21,24 +21,18 @@ const PHOTOS = [
   "/hero/photo-1.jpg",
   "/hero/photo-3.jpg"
 ];
-const PICKED: number[] = [0, 2, 4];
-const PICKED_SET = new Set(PICKED);
+const PICKED_INDEXES = [0, 2, 4];
+const PICKED_SET = new Set(PICKED_INDEXES);
 
-/* ───────────────────────────────────────────────────────────────
-   Picka product story — one sticky laptop, five acts of text.
-   Matches the spec: photos fly in, gallery assembles, share panel
-   slides out, cursor moves and hearts pop, picks separate, laptop
-   reaches final composition.
-   ─────────────────────────────────────────────────────────────── */
-
-type Act = "upload" | "share" | "pick" | "favorites" | "reveal";
+type Act = "upload" | "share" | "browse" | "pick" | "see" | "reveal";
 
 const ACT_AT: Array<[number, Act]> = [
   [0.00, "upload"],
-  [0.20, "share"],
-  [0.40, "pick"],
-  [0.62, "favorites"],
-  [0.82, "reveal"]
+  [0.17, "share"],
+  [0.34, "browse"],
+  [0.50, "pick"],
+  [0.68, "see"],
+  [0.86, "reveal"]
 ];
 
 function pickAct(p: number): Act {
@@ -50,16 +44,8 @@ function pickAct(p: number): Act {
 }
 
 export function ScrollStory() {
-  return (
-    <>
-      <ProductStory />
-      <HowItWorksCards />
-      <Finale />
-    </>
-  );
+  return <ProductStory />;
 }
-
-/* ─────────────── ONE big sticky story ─────────────── */
 
 function ProductStory() {
   const ref = useRef<HTMLDivElement>(null);
@@ -74,60 +60,87 @@ function ProductStory() {
     if (next !== act) setAct(next);
   });
 
-  /* Laptop grows across acts. Same device throughout — just scales,
-     shifts subtly, and tilts in the favorites act. */
+  /* Laptop fades + zooms in by 0.10, stays present, repositions per act */
   const laptopScale = useTransform(
     scrollYProgress,
-    [0,    0.18, 0.40, 0.62, 0.82, 0.96],
-    [0.78, 0.92, 1.00, 1.05, 1.12, 1.12]
+    [0,    0.10, 0.17, 0.34, 0.50, 0.68, 0.86, 1.00],
+    [0.82, 0.96, 1.00, 1.00, 0.88, 1.04, 0.86, 0.86]
   );
-  const laptopY = useTransform(scrollYProgress, [0, 0.05], [40, 0]);
-  const laptopOpacity = useTransform(scrollYProgress, [0, 0.04], [0, 1]);
-  const laptopRotate = useTransform(
-    scrollYProgress,
-    [0.55, 0.65, 0.80, 0.92],
-    [0, -2.5, -2.5, 0]
-  );
-  /* Shift left a bit during share act to make room for the share panel */
+  const laptopY = useTransform(scrollYProgress, [0, 0.08], [40, 0]);
+  const laptopOpacity = useTransform(scrollYProgress, [0, 0.08, 0.10], [0, 0.4, 1]);
   const laptopX = useTransform(
     scrollYProgress,
-    [0.20, 0.32, 0.40],
-    [0, -100, -80]
+    [0.17, 0.30, 0.34, 0.50, 0.68, 0.86, 1.00],
+    [0,    -100, -100, -120, 0,    -140, -140]
+  );
+  const laptopRotate = useTransform(
+    scrollYProgress,
+    [0.68, 0.74, 0.86],
+    [0, -2, -2]
   );
 
-  /* Share panel: visible in share act */
+  /* Phone enters at browse, leaves at see, comes back at reveal */
+  const phoneOpacity = useTransform(
+    scrollYProgress,
+    [0.34, 0.42, 0.66, 0.74, 0.86, 0.92],
+    [0,    1,    1,    0,    1,    1]
+  );
+  const phoneX = useTransform(
+    scrollYProgress,
+    [0.34, 0.42, 0.50, 0.66, 0.86, 1.00],
+    [260,  0,    -40,  -40,  140,  140]
+  );
+  const phoneScale = useTransform(
+    scrollYProgress,
+    [0.34, 0.42, 0.50, 0.66, 0.86, 1.00],
+    [0.82, 0.92, 1.10, 1.10, 0.86, 0.86]
+  );
+  const phoneRotate = useTransform(
+    scrollYProgress,
+    [0.34, 0.42, 0.50, 0.86],
+    [12,   -2,   0,    -3]
+  );
+
+  /* Share panel (act share, 0.17 - 0.34) */
   const panelOpacity = useTransform(
     scrollYProgress,
-    [0.20, 0.30, 0.38, 0.42],
+    [0.17, 0.22, 0.30, 0.34],
     [0, 1, 1, 0]
   );
-  const panelX = useTransform(scrollYProgress, [0.20, 0.30], [60, 0]);
-  const passwordOn = useTransform(scrollYProgress, [0.28, 0.33], [0, 1]);
-  const copied = useTransform(scrollYProgress, [0.34, 0.37], [0, 1]);
+  const panelX = useTransform(scrollYProgress, [0.17, 0.22], [60, 0]);
+  const passwordOn = useTransform(scrollYProgress, [0.24, 0.27], [0, 1]);
+  const copied = useTransform(scrollYProgress, [0.29, 0.32], [0, 1]);
 
-  /* Live counter for the pick act */
+  /* Counter (pick act, 0.50 - 0.68) */
   const count = useTransform(
     scrollYProgress,
-    [0.40, 0.46, 0.51, 0.56, 0.60],
+    [0.50, 0.54, 0.58, 0.62, 0.66],
     [0, 3, 8, 15, 24]
   );
   const [displayCount, setDisplayCount] = useState(0);
   useMotionValueEvent(count, "change", (v) => setDisplayCount(Math.round(v)));
 
-  /* Flying photos converge into the laptop during upload act */
+  /* Flying photos converge (upload act, 0.0 - 0.10) */
   const flyOpacity = useTransform(
     scrollYProgress,
-    [0, 0.04, 0.14, 0.18],
+    [0, 0.02, 0.08, 0.10],
+    [0, 1, 1, 0]
+  );
+
+  /* Action buttons (see act, 0.68 - 0.86) */
+  const actionsOpacity = useTransform(
+    scrollYProgress,
+    [0.72, 0.76, 0.84, 0.88],
     [0, 1, 1, 0]
   );
 
   return (
-    <div ref={ref} className="relative" style={{ height: "650vh" }}>
+    <div ref={ref} className="relative" style={{ height: "700vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
-        {/* Flying photos (upload act) */}
+        {/* Flying photos converge into the laptop */}
         <FlyingPhotos opacity={flyOpacity} progress={scrollYProgress} />
 
-        {/* Laptop — the throughline */}
+        {/* Laptop — present throughout */}
         <motion.div
           style={{
             scale: laptopScale,
@@ -143,23 +156,54 @@ function ProductStory() {
           </LaptopFrame>
         </motion.div>
 
-        {/* Share panel — slides in during share act */}
+        {/* Phone — joins from browse, becomes hero in pick, returns in reveal */}
+        <motion.div
+          style={{
+            opacity: phoneOpacity,
+            x: phoneX,
+            scale: phoneScale,
+            rotate: phoneRotate
+          }}
+          className="absolute right-[4%] top-1/2 z-30 -translate-y-1/2 md:right-[10%]"
+        >
+          <PhoneFrame>
+            <ClientView count={displayCount} progress={scrollYProgress} />
+          </PhoneFrame>
+        </motion.div>
+
+        {/* Share panel — share act */}
         <motion.div
           style={{ opacity: panelOpacity, x: panelX }}
-          className="pointer-events-none absolute right-[6%] top-[28%] z-30 w-[280px] md:right-[10%]"
+          className="pointer-events-none absolute right-[6%] top-[22%] z-30 w-[280px] md:right-[8%]"
         >
           <SharePanel passwordOn={passwordOn} copied={copied} />
         </motion.div>
 
-        {/* Text overlay — one at a time */}
-        <div className="pointer-events-none absolute inset-x-0 top-[10vh] z-40 px-6 md:top-[12vh] md:px-10">
+        {/* Action pills — see act */}
+        <motion.div
+          style={{ opacity: actionsOpacity }}
+          className="pointer-events-none absolute bottom-[14vh] left-1/2 z-40 flex -translate-x-1/2 gap-3"
+        >
+          <span className="rounded-full border border-ink/15 bg-paper/90 px-3 py-1.5 text-[10px] uppercase tracking-[0.25em] backdrop-blur">
+            Download picks
+          </span>
+          <span className="rounded-full border border-ink/15 bg-paper/90 px-3 py-1.5 text-[10px] uppercase tracking-[0.25em] backdrop-blur">
+            Export list
+          </span>
+          <span className="rounded-full bg-clay px-3 py-1.5 text-[10px] uppercase tracking-[0.25em] text-paper">
+            Start editing
+          </span>
+        </motion.div>
+
+        {/* Text overlay */}
+        <div className="pointer-events-none absolute inset-x-0 top-[7vh] z-40 px-6 md:px-10">
           <AnimatePresence mode="wait">
             {act === "upload" && (
               <SectionCopy
                 key="upload"
                 eyebrow="01 — Upload"
                 title="Upload once."
-                sub="Drag. Drop. Done."
+                sub="Drop your photos in. PICKA turns them into a clean gallery."
               />
             )}
             {act === "share" && (
@@ -167,39 +211,40 @@ function ProductStory() {
                 key="share"
                 eyebrow="02 — Share"
                 title="Share instantly."
-                sub="One gallery. One link."
+                sub="Send one private link. Add a password when you want control."
+              />
+            )}
+            {act === "browse" && (
+              <SectionCopy
+                key="browse"
+                eyebrow="03 — Browse"
+                title="Anyone can browse."
+                sub="No app. No account. Just open the link and view the gallery."
               />
             )}
             {act === "pick" && (
               <SectionCopy
                 key="pick"
-                eyebrow="03 — Pick"
+                eyebrow="04 — Pick"
                 title="Pick what matters."
-                sub="Your people heart their favourites with one tap."
-                pillLabel={`${displayCount} selected`}
+                sub="People save their favourites with one tap."
+                pillLabel={`${displayCount} picked`}
               />
             )}
-            {act === "favorites" && (
+            {act === "see" && (
               <SectionCopy
-                key="favorites"
-                eyebrow="04 — Favorites"
-                title="Your favorites, organised."
-                sub="The keepers, surfaced. The rest, gently out of the way."
+                key="see"
+                eyebrow="05 — See every pick"
+                title="See every pick."
+                sub="Open the selected set and know exactly what to deliver."
               />
             )}
-            {act === "reveal" && (
-              <SectionCopy
-                key="reveal"
-                eyebrow="05 — Picka"
-                title="A better way to share photos."
-                sub=""
-              />
-            )}
+            {act === "reveal" && <RevealOverlay key="reveal" />}
           </AnimatePresence>
         </div>
 
         {/* Scroll affordance */}
-        <div className="pointer-events-none absolute bottom-8 left-1/2 z-40 -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.4em] text-mute">
+        <div className="pointer-events-none absolute bottom-6 left-1/2 z-40 -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.4em] text-mute">
           <motion.div
             animate={{ y: [0, 6, 0] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
@@ -234,7 +279,7 @@ function SectionCopy({
       className="mx-auto max-w-3xl text-center"
     >
       <p className="text-[11px] uppercase tracking-[0.4em] text-mute">{eyebrow}</p>
-      <h2 className="mt-3 font-serif text-[clamp(2.25rem,5.5vw,4.5rem)] italic leading-[0.95] tracking-tightest">
+      <h2 className="mt-3 font-serif text-[clamp(2rem,5vw,4rem)] italic leading-[0.95] tracking-tightest">
         {title}
       </h2>
       {sub && (
@@ -249,7 +294,36 @@ function SectionCopy({
   );
 }
 
-/* ─────────────── Flying photos (upload act) ─────────────── */
+/* ─────────────── Reveal overlay (final act + CTA) ─────────────── */
+
+function RevealOverlay() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.7, ease: EASE }}
+      className="mx-auto max-w-3xl text-center"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo.png" alt="Picka." className="mx-auto h-9 w-auto md:h-12" />
+      <h2 className="mt-5 font-serif text-[clamp(2rem,5vw,4rem)] italic leading-[0.95] tracking-tightest">
+        A better way to share photos.
+      </h2>
+      <p className="mx-auto mt-3 max-w-md text-sm text-ink/65 md:text-base">
+        Create beautiful galleries and share them with anyone.
+      </p>
+      <Link
+        href="/admin"
+        className="pointer-events-auto mt-6 inline-flex items-center gap-3 rounded-full bg-clay px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-paper shadow-[0_20px_60px_-20px_rgba(200,100,69,0.45)] transition-all duration-300 hover:scale-[1.04] hover:bg-clay-soft"
+      >
+        Create Gallery <span aria-hidden>→</span>
+      </Link>
+    </motion.div>
+  );
+}
+
+/* ─────────────── Flying photos ─────────────── */
 
 const FLYING_FROM = [
   { x: -700, y: -300, r: -12 },
@@ -289,10 +363,10 @@ function FlyingPhoto({
   from: { x: number; y: number; r: number };
   index: number;
 }) {
-  const x = useTransform(progress, [0.04, 0.16], [from.x, 0]);
-  const y = useTransform(progress, [0.04, 0.16], [from.y, 0]);
-  const scale = useTransform(progress, [0.04, 0.16], [1, 0.18]);
-  const rotate = useTransform(progress, [0.04, 0.16], [from.r, 0]);
+  const x = useTransform(progress, [0.02, 0.10], [from.x, 0]);
+  const y = useTransform(progress, [0.02, 0.10], [from.y, 0]);
+  const scale = useTransform(progress, [0.02, 0.10], [1, 0.18]);
+  const rotate = useTransform(progress, [0.02, 0.10], [from.r, 0]);
   return (
     <motion.div
       className="absolute left-1/2 top-1/2 -ml-16 -mt-20"
@@ -300,7 +374,7 @@ function FlyingPhoto({
     >
       <div className="h-40 w-32 overflow-hidden rounded-2xl shadow-[0_30px_60px_-20px_rgba(14,14,16,0.30)] ring-1 ring-ink/5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={PHOTOS[index]} alt="" className="block h-full w-full object-cover" />
+        <img src={PHOTOS[index]} alt="" loading="eager" className="block h-full w-full object-cover" />
       </div>
     </motion.div>
   );
@@ -394,6 +468,25 @@ function LaptopFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
+/* ─────────────── Phone frame ─────────────── */
+
+function PhoneFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative w-[230px]">
+      <div className="rounded-[2.25rem] bg-ink p-1.5 shadow-[0_50px_100px_-25px_rgba(14,14,16,0.5)] ring-1 ring-ink/30">
+        <div className="relative overflow-hidden rounded-[2rem] bg-paper">
+          <div className="flex items-center justify-between px-5 pb-1 pt-2.5 text-[8px] font-medium text-ink/80">
+            <span>9:41</span>
+            <span className="ml-1 inline-block h-1 w-2.5 rounded-sm bg-ink/80" />
+          </div>
+          {children}
+        </div>
+        <div className="absolute left-1/2 top-0 z-10 h-4 w-20 -translate-x-1/2 rounded-b-2xl bg-ink" />
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────── Creator (laptop) view ─────────────── */
 
 function CreatorView({
@@ -405,7 +498,7 @@ function CreatorView({
   count: number;
   act: Act;
 }) {
-  const showCounter = act === "pick" || act === "favorites" || act === "reveal";
+  const showCounter = act === "pick" || act === "see" || act === "reveal";
   return (
     <div className="relative flex h-[calc(100%-1.75rem)] flex-col">
       <div className="flex items-center justify-between border-b border-ink/10 px-3 py-2">
@@ -432,13 +525,10 @@ function CreatorView({
           <LaptopPhoto
             key={i}
             src={src}
-            index={i}
             progress={progress}
             picked={PICKED_SET.has(i)}
           />
         ))}
-        {/* Animated cursor during pick act */}
-        <Cursor progress={progress} />
       </div>
     </div>
   );
@@ -446,70 +536,43 @@ function CreatorView({
 
 function LaptopPhoto({
   src,
-  index,
   progress,
   picked
 }: {
   src: string;
-  index: number;
   progress: MotionValue<number>;
   picked: boolean;
 }) {
-  /* Photos fade in during the upload act, staggered per index */
-  const enterStart = 0.06 + index * 0.012;
-  const baseOpacity = useTransform(progress, [enterStart, enterStart + 0.04], [0, 1]);
-
-  /* In the favorites act, non-picked dim. In reveal act, everything comes back. */
-  const finalOpacity = useTransform(
+  /* Dim non-picked photos during the "see every pick" act */
+  const dimOpacity = useTransform(
     progress,
-    [0.60, 0.66, 0.82, 0.88],
+    [0.66, 0.72, 0.86, 0.92],
     picked ? [1, 1, 1, 1] : [1, 0.18, 0.18, 0.5]
   );
-  const opacity = useTransform([baseOpacity, finalOpacity] as const, ([b, f]: number[]) =>
-    Math.min(b, f)
-  );
-
-  /* Picked ring strength: appears during favorites, fades a touch in reveal */
+  /* Picked photos get a clay ring during see/reveal */
   const ringOpacity = useTransform(
     progress,
-    [0.55, 0.62, 0.85, 0.92],
-    picked ? [0, 1, 1, 0.6] : [0, 0, 0, 0]
-  );
-
-  /* Heart pop schedule for picked photos in pick act */
-  const pickedOrder = picked ? PICKED.indexOf(index as 0 | 2 | 4) : -1;
-  const heartStart = picked ? 0.44 + pickedOrder * 0.05 : 0;
-  const heartOpacity = useTransform(
-    progress,
-    picked ? [heartStart, heartStart + 0.02] : [0, 1],
-    picked ? [0, 1] : [0, 0]
-  );
-  const heartScale = useTransform(
-    progress,
-    picked
-      ? [heartStart, heartStart + 0.015, heartStart + 0.03]
-      : [0, 1],
-    picked ? [0.3, 1.3, 1] : [0, 0]
+    [0.66, 0.72, 0.86, 0.96],
+    picked ? [0, 1, 1, 0.7] : [0, 0, 0, 0]
   );
 
   return (
     <motion.div
-      style={{ opacity }}
+      style={{ opacity: dimOpacity }}
       className="relative overflow-hidden rounded"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" className="block aspect-[4/5] h-full w-full object-cover" />
-
+      <img src={src} alt="" loading="eager" className="block aspect-[4/5] h-full w-full object-cover" />
       {picked && (
         <motion.span
           style={{ opacity: ringOpacity }}
-          className="pointer-events-none absolute inset-0 rounded ring-2 ring-clay ring-offset-0"
+          className="pointer-events-none absolute inset-0 rounded ring-2 ring-clay"
           aria-hidden
         />
       )}
       {picked && (
         <motion.div
-          style={{ opacity: heartOpacity, scale: heartScale }}
+          style={{ opacity: ringOpacity }}
           className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-clay text-paper shadow ring-1 ring-paper"
           aria-hidden
         >
@@ -520,186 +583,113 @@ function LaptopPhoto({
   );
 }
 
-/* ─────────────── Animated cursor (pick act) ─────────────── */
+/* ─────────────── Client (phone) view ─────────────── */
 
-function Cursor({ progress }: { progress: MotionValue<number> }) {
-  /* Visible only during the pick act */
-  const opacity = useTransform(
-    progress,
-    [0.40, 0.42, 0.60, 0.62],
-    [0, 1, 1, 0]
-  );
+function ClientView({
+  count,
+  progress
+}: {
+  count: number;
+  progress: MotionValue<number>;
+}) {
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between border-b border-ink/10 px-3 pb-2 pt-1">
+        <div className="flex items-center gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Picka." className="h-2.5 w-auto" />
+          <div className="border-l border-ink/15 pl-2">
+            <p className="text-[8px] font-bold leading-none">Sarah&rsquo;s Grad</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 rounded-full border border-clay/30 bg-clay/[0.08] px-1.5 py-0.5">
+          <HeartGlyph className="h-2 w-2 text-clay" />
+          <span className="text-[8px] font-semibold tabular-nums text-clay">{count}</span>
+        </div>
+      </div>
 
-  /* Three-column grid, two rows:
-       col x: 17% / 50% / 83%
-       row y: 30% / 75%
-     Picked photos are indexes 0 (col 1 row 1), 2 (col 3 row 1), 4 (col 2 row 2).
-     The cursor visits each in sequence. */
-  const left = useTransform(
-    progress,
-    [0.40, 0.45, 0.50, 0.55, 0.60],
-    ["8%", "17%", "83%", "50%", "50%"]
+      <div className="grid grid-cols-2 gap-1 p-1.5">
+        {PHOTOS.map((src, i) => (
+          <PhonePhoto
+            key={i}
+            src={src}
+            index={i}
+            progress={progress}
+            picked={PICKED_SET.has(i)}
+          />
+        ))}
+      </div>
+
+      <div className="border-t border-ink/10 p-2">
+        <div className="rounded-full bg-ink py-1.5 text-center text-[8px] font-semibold uppercase tracking-widest text-paper">
+          Send picks →
+        </div>
+      </div>
+    </div>
   );
-  const top = useTransform(
+}
+
+function PhonePhoto({
+  src,
+  index,
+  progress,
+  picked
+}: {
+  src: string;
+  index: number;
+  progress: MotionValue<number>;
+  picked: boolean;
+}) {
+  /* Hearts pop during pick act (0.50 - 0.66) on three picked photos in sequence */
+  const pickedOrder = picked ? PICKED_INDEXES.indexOf(index) : -1;
+  const heartStart = picked ? 0.52 + pickedOrder * 0.04 : 0;
+  const heartOpacity = useTransform(
     progress,
-    [0.40, 0.45, 0.50, 0.55, 0.60],
-    ["10%", "30%", "30%", "75%", "75%"]
+    picked ? [heartStart, heartStart + 0.02] : [0, 1],
+    picked ? [0, 1] : [0, 0]
+  );
+  const heartScale = useTransform(
+    progress,
+    picked ? [heartStart, heartStart + 0.015, heartStart + 0.03] : [0, 1],
+    picked ? [0.3, 1.3, 1] : [0, 0]
+  );
+  /* Dim non-picked during pick act */
+  const dimOpacity = useTransform(
+    progress,
+    [0.56, 0.62],
+    picked ? [1, 1] : [1, 0.45]
+  );
+  /* Clay ring on picked photos */
+  const ringOpacity = useTransform(
+    progress,
+    picked ? [heartStart, heartStart + 0.02] : [0, 1],
+    picked ? [0, 1] : [0, 0]
   );
 
   return (
-    <motion.div
-      style={{ opacity, left, top }}
-      className="pointer-events-none absolute z-40 -translate-x-1 -translate-y-1"
-      aria-hidden
-    >
-      <svg viewBox="0 0 18 22" className="h-5 w-5 drop-shadow-md">
-        <path
-          d="M2 2L16 14L9 14L7 20L2 2Z"
-          fill="#0e0e10"
-          stroke="#fafaf7"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
+    <motion.div style={{ opacity: dimOpacity }} className="relative">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" loading="eager" className="block aspect-square rounded-md object-cover" />
+      {picked && (
+        <motion.span
+          style={{ opacity: ringOpacity }}
+          className="pointer-events-none absolute inset-0 rounded-md ring-2 ring-clay"
+          aria-hidden
         />
-      </svg>
+      )}
+      {picked && (
+        <motion.div
+          style={{ opacity: heartOpacity, scale: heartScale }}
+          className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-clay text-paper shadow ring-1 ring-paper"
+          aria-hidden
+        >
+          <HeartGlyph className="h-2 w-2" />
+        </motion.div>
+      )}
     </motion.div>
   );
 }
 
-/* ─────────────── How it works cards ─────────────── */
-
-function HowItWorksCards() {
-  const STEPS = [
-    {
-      title: "Upload",
-      body: "Drag your photos into a private gallery. PICKA lays them out beautifully.",
-      Icon: UploadIcon
-    },
-    {
-      title: "Share",
-      body: "Send one link and a passcode. No apps. No accounts. Anyone can open it.",
-      Icon: ShareIcon
-    },
-    {
-      title: "Discover",
-      body: "Your people heart their favourites. You see exactly what to deliver.",
-      Icon: HeartIcon
-    }
-  ];
-  return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center px-6 py-24 md:px-10">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-20%" }}
-        transition={{ duration: 1.0, ease: EASE }}
-        className="text-center"
-      >
-        <p className="text-[11px] uppercase tracking-[0.4em] text-mute">How it works</p>
-        <h2 className="mt-4 font-serif text-5xl italic leading-[0.95] tracking-tightest md:text-7xl">
-          Three quiet steps.
-        </h2>
-      </motion.div>
-
-      <div className="mt-16 grid w-full max-w-6xl gap-6 md:grid-cols-3 md:gap-8">
-        {STEPS.map((step, i) => (
-          <motion.article
-            key={step.title}
-            initial={{ opacity: 0, y: 50, filter: "blur(6px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            viewport={{ once: true, margin: "-15%" }}
-            transition={{ duration: 1.1, ease: EASE, delay: 0.1 + i * 0.15 }}
-            className="group relative flex flex-col rounded-3xl border border-ink/10 bg-paper p-8 transition-all duration-500 hover:-translate-y-1 hover:border-clay/40 hover:shadow-[0_30px_60px_-30px_rgba(200,100,69,0.35)] md:p-10"
-          >
-            <div className="mb-8 flex h-11 w-11 items-center justify-center rounded-full bg-ink/[0.04] transition-colors duration-500 group-hover:bg-clay group-hover:text-paper">
-              <step.Icon />
-            </div>
-            <p className="text-[10px] uppercase tracking-[0.35em] text-mute">
-              {String(i + 1).padStart(2, "0")}
-            </p>
-            <h3 className="mt-2 font-serif text-3xl italic leading-tight tracking-tight">
-              {step.title}
-            </h3>
-            <p className="mt-4 text-ink/65 leading-relaxed">{step.body}</p>
-          </motion.article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────── Finale ─────────────── */
-
-function Finale() {
-  return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-24 md:px-10">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-25%" }}
-        transition={{ duration: 1.0, ease: EASE }}
-        className="mx-auto flex w-full max-w-3xl flex-col items-center text-center"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <motion.img
-          src="/logo.png"
-          alt="Picka."
-          initial={{ opacity: 0, scale: 0.92 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-25%" }}
-          transition={{ duration: 1.0, delay: 0.1, ease: EASE }}
-          className="h-10 w-auto md:h-14"
-        />
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-25%" }}
-          transition={{ duration: 1.0, delay: 0.25, ease: EASE }}
-          className="mt-10 font-serif text-[clamp(2.5rem,7vw,5.5rem)] italic leading-[0.95] tracking-tightest"
-        >
-          Ready to share <br className="hidden md:block" />
-          your first gallery?
-        </motion.h2>
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-25%" }}
-          transition={{ duration: 0.9, delay: 0.55, ease: EASE }}
-        >
-          <Link
-            href="/admin"
-            className="mt-10 inline-flex items-center gap-3 rounded-full bg-clay px-10 py-5 text-sm font-medium uppercase tracking-[0.2em] text-paper shadow-[0_20px_60px_-20px_rgba(200,100,69,0.45)] transition-all duration-300 hover:scale-[1.04] hover:bg-clay-soft"
-          >
-            Create Gallery <span aria-hidden>→</span>
-          </Link>
-        </motion.div>
-      </motion.div>
-    </section>
-  );
-}
-
-/* ─────────────── Icons ─────────────── */
-
-function UploadIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-      <path d="M12 16V4M6 10l6-6 6 6M4 20h16" />
-    </svg>
-  );
-}
-function ShareIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-      <path d="M10 14l-5 5M5 14h5v5M14 10l5-5M19 10V5h-5" />
-    </svg>
-  );
-}
-function HeartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
-    </svg>
-  );
-}
 function HeartGlyph({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
