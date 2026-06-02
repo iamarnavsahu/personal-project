@@ -311,9 +311,8 @@ function HowItWorks() {
         transition={{ duration: 1.0, ease: EASE }}
         className="text-center"
       >
-        <p className="text-[11px] uppercase tracking-[0.4em] text-mute">How it works</p>
-        <h2 className="mt-4 font-serif text-5xl italic leading-[0.95] tracking-tightest md:text-7xl">
-          Three quiet steps.
+        <h2 className="font-serif text-[clamp(3rem,9vw,8rem)] italic leading-[0.9] tracking-tightest">
+          How it works.
         </h2>
       </motion.div>
 
