@@ -24,42 +24,42 @@ type Card = {
 
 const CARDS: Card[] = [
   {
-    src: "/hero/photo-1.png",
+    src: "/hero/photo-1.jpg",
     cls: "top-[6%] left-[4%] w-32 md:w-44",
     rotate: -8, depth: 32, blur: 0, opacity: 1, floatDur: 7
   },
   {
-    src: "/hero/photo-3.png",
+    src: "/hero/photo-3.jpg",
     cls: "top-[4%] right-[6%] w-36 md:w-48",
     rotate: 6, depth: 26, blur: 0, opacity: 1, floatDur: 8
   },
   {
-    src: "/hero/photo-2.png",
+    src: "/hero/photo-2.jpg",
     cls: "top-[34%] left-[1%] w-24 md:w-36",
     rotate: -3, depth: 18, blur: 2, opacity: 0.92, floatDur: 9
   },
   {
-    src: "/hero/photo-4.png",
+    src: "/hero/photo-4.jpg",
     cls: "top-[36%] right-[2%] w-28 md:w-40",
     rotate: 4, depth: 22, blur: 0, opacity: 1, floatDur: 7.5
   },
   {
-    src: "/hero/photo-3.png",
+    src: "/hero/photo-3.jpg",
     cls: "bottom-[6%] left-[14%] w-28 md:w-36",
     rotate: 7, depth: 24, blur: 1, opacity: 0.95, floatDur: 8.5
   },
   {
-    src: "/hero/photo-1.png",
+    src: "/hero/photo-1.jpg",
     cls: "bottom-[8%] right-[16%] w-28 md:w-40",
     rotate: -5, depth: 28, blur: 0, opacity: 1, floatDur: 6.5
   },
   {
-    src: "/hero/photo-4.png",
+    src: "/hero/photo-4.jpg",
     cls: "top-[20%] left-[38%] w-20 md:w-28",
     rotate: 9, depth: 14, blur: 4, opacity: 0.5, floatDur: 10
   },
   {
-    src: "/hero/photo-2.png",
+    src: "/hero/photo-2.jpg",
     cls: "bottom-[24%] right-[38%] w-20 md:w-28",
     rotate: -7, depth: 16, blur: 3, opacity: 0.55, floatDur: 9.5
   }
