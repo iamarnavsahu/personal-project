@@ -74,3 +74,16 @@ export async function submitPicks(galleryId: string, slug: string) {
   await admin.from("galleries").update({ is_locked: true }).eq("id", galleryId);
   revalidatePath(`/g/${slug}`);
 }
+
+export async function relockGallery(galleryId: string, slug: string) {
+  // Wipe the unlock cookie so the next visit shows the passcode form again.
+  // Useful for testing and for shared computers.
+  cookies().set(cookieName(galleryId), "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0
+  });
+  revalidatePath(`/g/${slug}`);
+  return { ok: true };
+}

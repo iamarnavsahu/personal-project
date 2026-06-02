@@ -1,7 +1,8 @@
 "use client";
 
 import { useOptimistic, useState, useTransition } from "react";
-import { togglePick, submitPicks } from "./actions";
+import { useRouter } from "next/navigation";
+import { togglePick, submitPicks, relockGallery } from "./actions";
 
 type Photo = { id: string; filename: string; url: string; fullUrl: string; picked: boolean };
 
@@ -15,6 +16,7 @@ export function ClientGallery({
   isLocked: boolean;
   photos: Photo[];
 }) {
+  const router = useRouter();
   const [pending, start] = useTransition();
   const [optimistic, applyOptimistic] = useOptimistic(
     photos,
@@ -68,6 +70,24 @@ export function ClientGallery({
                 Submit picks
               </button>
             )}
+            <button
+              onClick={() => {
+                if (!confirm("Sign out of this gallery? You'll need the passcode again to view it.")) return;
+                start(async () => {
+                  await relockGallery(galleryId, slug);
+                  router.refresh();
+                });
+              }}
+              disabled={pending}
+              title="Sign out — re-enter passcode next visit"
+              aria-label="Sign out"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition hover:border-ink hover:text-ink"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                <rect x="5" y="11" width="14" height="9" rx="2" />
+                <path d="M8 11V7a4 4 0 018 0v4" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
