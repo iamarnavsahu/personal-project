@@ -14,12 +14,12 @@ import {
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const PHOTOS = [
-  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=500&fit=crop&q=75"
+  "/hero/photo-1.png",
+  "/hero/photo-2.png",
+  "/hero/photo-3.png",
+  "/hero/photo-4.png",
+  "/hero/photo-1.png",
+  "/hero/photo-3.png"
 ];
 const PICKED: number[] = [0, 2, 4];
 const PICKED_SET = new Set(PICKED);

@@ -24,42 +24,42 @@ type Card = {
 
 const CARDS: Card[] = [
   {
-    src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=420&h=540&fit=crop&q=75",
+    src: "/hero/photo-1.png",
     cls: "top-[6%] left-[4%] w-32 md:w-44",
     rotate: -8, depth: 32, blur: 0, opacity: 1, floatDur: 7
   },
   {
-    src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=420&h=420&fit=crop&q=75",
+    src: "/hero/photo-3.png",
     cls: "top-[4%] right-[6%] w-36 md:w-48",
     rotate: 6, depth: 26, blur: 0, opacity: 1, floatDur: 8
   },
   {
-    src: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=420&h=560&fit=crop&q=75",
+    src: "/hero/photo-2.png",
     cls: "top-[34%] left-[1%] w-24 md:w-36",
     rotate: -3, depth: 18, blur: 2, opacity: 0.92, floatDur: 9
   },
   {
-    src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=420&h=540&fit=crop&q=75",
+    src: "/hero/photo-4.png",
     cls: "top-[36%] right-[2%] w-28 md:w-40",
     rotate: 4, depth: 22, blur: 0, opacity: 1, floatDur: 7.5
   },
   {
-    src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=420&h=440&fit=crop&q=75",
+    src: "/hero/photo-3.png",
     cls: "bottom-[6%] left-[14%] w-28 md:w-36",
     rotate: 7, depth: 24, blur: 1, opacity: 0.95, floatDur: 8.5
   },
   {
-    src: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=420&h=440&fit=crop&q=75",
+    src: "/hero/photo-1.png",
     cls: "bottom-[8%] right-[16%] w-28 md:w-40",
     rotate: -5, depth: 28, blur: 0, opacity: 1, floatDur: 6.5
   },
   {
-    src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=420&h=520&fit=crop&q=75",
+    src: "/hero/photo-4.png",
     cls: "top-[20%] left-[38%] w-20 md:w-28",
     rotate: 9, depth: 14, blur: 4, opacity: 0.5, floatDur: 10
   },
   {
-    src: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=420&h=520&fit=crop&q=75",
+    src: "/hero/photo-2.png",
     cls: "bottom-[24%] right-[38%] w-20 md:w-28",
     rotate: -7, depth: 16, blur: 3, opacity: 0.55, floatDur: 9.5
   }
