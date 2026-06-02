@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { thumbnailUrl } from "@/lib/storage";
 import { PasscodeForm } from "./passcode-form";
 import { ClientGallery } from "./client-gallery";
 import { UnlockIntro } from "./unlock-intro";
@@ -46,15 +47,21 @@ export default async function PublicGalleryPage({ params }: { params: { slug: st
     .eq("gallery_id", gallery.id);
   const pickedIds = new Set(picks?.map((p) => p.photo_id));
 
+  // 1h signed URLs. Grid uses a ~600px transformed thumbnail, the
+  // lightbox uses the full-size original.
   const signed = await admin.storage
     .from("photos")
     .createSignedUrls(photos?.map((p) => p.storage_path) ?? [], 3600);
-  const items = (photos ?? []).map((p, i) => ({
-    id: p.id,
-    filename: p.filename,
-    url: signed.data?.[i]?.signedUrl ?? "",
-    picked: pickedIds.has(p.id)
-  }));
+  const items = (photos ?? []).map((p, i) => {
+    const full = signed.data?.[i]?.signedUrl ?? "";
+    return {
+      id: p.id,
+      filename: p.filename,
+      url: full ? thumbnailUrl(full, 600) : "",
+      fullUrl: full,
+      picked: pickedIds.has(p.id)
+    };
+  });
 
   return (
     <>

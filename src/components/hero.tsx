@@ -44,7 +44,7 @@ const CARDS: Card[] = [
     rotate: 4, depth: 22, blur: 0, opacity: 1, floatDur: 7.5
   },
   {
-    src: "/hero/photo-3.jpg",
+    src: "/hero/photo-6.jpg",
     cls: "bottom-[6%] left-[14%] w-28 md:w-36",
     rotate: 7, depth: 24, blur: 1, opacity: 0.95, floatDur: 8.5
   },

@@ -3,7 +3,7 @@
 import { useOptimistic, useState, useTransition } from "react";
 import { togglePick, submitPicks } from "./actions";
 
-type Photo = { id: string; filename: string; url: string; picked: boolean };
+type Photo = { id: string; filename: string; url: string; fullUrl: string; picked: boolean };
 
 export function ClientGallery({
   galleryId, slug, title, clientName, isLocked, photos
@@ -81,8 +81,10 @@ export function ClientGallery({
               <img
                 src={p.url}
                 alt={p.filename}
+                loading="lazy"
+                decoding="async"
                 onClick={() => setLightbox(p)}
-                className="aspect-square w-full cursor-zoom-in object-cover"
+                className="aspect-square w-full cursor-zoom-in bg-ink/5 object-cover"
               />
               <button
                 onClick={() => toggle(p)}
@@ -105,7 +107,7 @@ export function ClientGallery({
           className="fixed inset-0 z-20 flex items-center justify-center bg-black/90 p-4"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={lightbox.url} alt={lightbox.filename} className="max-h-full max-w-full object-contain" />
+          <img src={lightbox.fullUrl || lightbox.url} alt={lightbox.filename} className="max-h-full max-w-full object-contain" />
           <button
             onClick={(e) => { e.stopPropagation(); toggle(lightbox); }}
             disabled={submitted}

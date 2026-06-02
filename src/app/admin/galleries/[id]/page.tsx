@@ -3,8 +3,9 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { deleteGallery } from "@/app/admin/actions";
+import { thumbnailUrl } from "@/lib/storage";
 import { Uploader } from "./uploader";
-import { PhotoCard } from "./photo-card";
+import { PhotosGrid } from "./photos-grid";
 import { PasscodeUpdateForm } from "./passcode-update-form";
 
 export default async function GalleryAdminPage({ params }: { params: { id: string } }) {
@@ -31,13 +32,14 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
     .eq("gallery_id", gallery.id);
   const pickedIds = new Set(picks?.map((p) => p.photo_id));
 
-  // Signed URLs for previews (1 hour)
+  // Signed URLs for previews (1 hour). Wrap each in an image transform
+  // so the browser pulls a ~400px thumbnail instead of the full-size JPEG.
   const signed = await admin.storage
     .from("photos")
     .createSignedUrls(photos?.map((p) => p.storage_path) ?? [], 3600);
   const urlMap = new Map<string, string>();
   signed.data?.forEach((s, i) => {
-    if (s.signedUrl && photos?.[i]) urlMap.set(photos[i].id, s.signedUrl);
+    if (s.signedUrl && photos?.[i]) urlMap.set(photos[i].id, thumbnailUrl(s.signedUrl, 400));
   });
 
   const shareUrl = `/g/${gallery.slug}`;
@@ -78,17 +80,17 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
         {!photos?.length ? (
           <p className="mt-4 text-ink/60">No photos yet. Upload above.</p>
         ) : (
-          <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {photos.map((p) => (
-              <PhotoCard
-                key={p.id}
-                id={p.id}
-                filename={p.filename}
-                url={urlMap.get(p.id) ?? ""}
-                picked={pickedIds.has(p.id)}
-              />
-            ))}
-          </ul>
+          <div className="mt-4">
+            <PhotosGrid
+              galleryId={gallery.id}
+              photos={photos.map((p) => ({
+                id: p.id,
+                filename: p.filename,
+                url: urlMap.get(p.id) ?? "",
+                picked: pickedIds.has(p.id)
+              }))}
+            />
+          </div>
         )}
       </div>
     </div>

@@ -119,6 +119,41 @@ export async function deletePhoto(photoId: string) {
   revalidatePath(`/admin/galleries/${photo.gallery_id}`);
 }
 
+export async function bulkDeletePhotos(galleryId: string, photoIds: string[]) {
+  const user = await requireUser();
+  if (!photoIds.length) return { ok: true, deleted: 0 };
+  const admin = getSupabaseAdmin();
+
+  // Confirm gallery ownership in one round-trip
+  const { data: gallery } = await admin
+    .from("galleries")
+    .select("id")
+    .eq("id", galleryId)
+    .eq("owner_id", user.id)
+    .single();
+  if (!gallery) return { error: "Gallery not found" };
+
+  // Fetch storage paths for every selected photo (still inside that gallery)
+  const { data: photos } = await admin
+    .from("photos")
+    .select("id, storage_path")
+    .eq("gallery_id", galleryId)
+    .in("id", photoIds);
+  if (!photos?.length) return { ok: true, deleted: 0 };
+
+  const paths = photos.map((p) => p.storage_path);
+  const ids = photos.map((p) => p.id);
+
+  // Bulk-remove from storage and DB in parallel
+  await Promise.all([
+    admin.storage.from(BUCKET).remove(paths),
+    admin.from("photos").delete().in("id", ids)
+  ]);
+
+  revalidatePath(`/admin/galleries/${galleryId}`);
+  return { ok: true, deleted: ids.length };
+}
+
 export async function deleteGallery(galleryId: string) {
   await requireUser();
   const admin = getSupabaseAdmin();
