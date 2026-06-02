@@ -14,29 +14,31 @@ import {
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const PHOTOS = [
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=400&h=500&fit=crop&q=75",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop&q=75",
+  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=500&fit=crop&q=75",
+  "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&h=500&fit=crop&q=75",
+  "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=500&fit=crop&q=75",
   "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=500&fit=crop&q=75",
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=500&fit=crop&q=75",
   "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=500&fit=crop&q=75"
 ];
-const PICKED = new Set([0, 2, 4]);
+const PICKED: number[] = [0, 2, 4];
+const PICKED_SET = new Set(PICKED);
 
 /* ───────────────────────────────────────────────────────────────
    Picka product story — one sticky laptop, five acts of text.
-   Mirrors Diem: a single device persists across the scroll while
-   the narrative changes around it.
+   Matches the spec: photos fly in, gallery assembles, share panel
+   slides out, cursor moves and hearts pop, picks separate, laptop
+   reaches final composition.
    ─────────────────────────────────────────────────────────────── */
 
-type Act = "upload" | "share" | "browse" | "pick" | "see";
+type Act = "upload" | "share" | "pick" | "favorites" | "reveal";
 
 const ACT_AT: Array<[number, Act]> = [
   [0.00, "upload"],
   [0.20, "share"],
-  [0.40, "browse"],
-  [0.58, "pick"],
-  [0.78, "see"]
+  [0.40, "pick"],
+  [0.62, "favorites"],
+  [0.82, "reveal"]
 ];
 
 function pickAct(p: number): Act {
@@ -57,7 +59,7 @@ export function ScrollStory() {
   );
 }
 
-/* ─────────────── ONE big sticky scroll story ─────────────── */
+/* ─────────────── ONE big sticky story ─────────────── */
 
 function ProductStory() {
   const ref = useRef<HTMLDivElement>(null);
@@ -72,75 +74,47 @@ function ProductStory() {
     if (next !== act) setAct(next);
   });
 
-  /* Laptop stays present across all acts. It scales very gently
-     so it feels like one continuous device, not jumps. */
+  /* Laptop grows across acts. Same device throughout — just scales,
+     shifts subtly, and tilts in the favorites act. */
   const laptopScale = useTransform(
     scrollYProgress,
-    [0, 0.1, 0.95, 1],
-    [0.92, 1.0, 1.0, 0.95]
+    [0,    0.18, 0.40, 0.62, 0.82, 0.96],
+    [0.78, 0.92, 1.00, 1.05, 1.12, 1.12]
   );
-  const laptopY = useTransform(scrollYProgress, [0, 0.1], [50, 0]);
-  const laptopOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
-  /* Subtle tilt during the "see picks" act for depth */
-  const laptopRotate = useTransform(scrollYProgress, [0.78, 0.88], [0, -2]);
-  /* Shift left in pick + see-picks acts to make room for the phone */
+  const laptopY = useTransform(scrollYProgress, [0, 0.05], [40, 0]);
+  const laptopOpacity = useTransform(scrollYProgress, [0, 0.04], [0, 1]);
+  const laptopRotate = useTransform(
+    scrollYProgress,
+    [0.55, 0.65, 0.80, 0.92],
+    [0, -2.5, -2.5, 0]
+  );
+  /* Shift left a bit during share act to make room for the share panel */
   const laptopX = useTransform(
     scrollYProgress,
-    [0.40, 0.55, 0.78, 0.90],
-    [0, -120, -80, -60]
-  );
-  const laptopMainOpacity = useTransform(
-    scrollYProgress,
-    [0.40, 0.55, 0.78, 0.90],
-    [1, 0.45, 0.9, 1]
+    [0.20, 0.32, 0.40],
+    [0, -100, -80]
   );
 
-  /* Phone enters at the "browse" act, becomes hero in "pick", exits in "see" */
-  const phoneOpacity = useTransform(
-    scrollYProgress,
-    [0.40, 0.50, 0.78, 0.85],
-    [0, 1, 1, 0]
-  );
-  const phoneX = useTransform(
-    scrollYProgress,
-    [0.40, 0.50, 0.78, 0.85],
-    [240, 0, 0, 220]
-  );
-  const phoneScale = useTransform(
-    scrollYProgress,
-    [0.40, 0.50, 0.58, 0.70, 0.78],
-    [0.85, 0.95, 1.15, 1.15, 0.95]
-  );
-  const phoneRotate = useTransform(
-    scrollYProgress,
-    [0.40, 0.50, 0.85],
-    [10, -2, -6]
-  );
-
-  /* Share panel slides out in act "share" */
+  /* Share panel: visible in share act */
   const panelOpacity = useTransform(
     scrollYProgress,
-    [0.20, 0.30, 0.40, 0.45],
+    [0.20, 0.30, 0.38, 0.42],
     [0, 1, 1, 0]
   );
-  const panelX = useTransform(
-    scrollYProgress,
-    [0.20, 0.30],
-    [60, 0]
-  );
-  const passwordOn = useTransform(scrollYProgress, [0.30, 0.35], [0, 1]);
-  const copied = useTransform(scrollYProgress, [0.36, 0.39], [0, 1]);
+  const panelX = useTransform(scrollYProgress, [0.20, 0.30], [60, 0]);
+  const passwordOn = useTransform(scrollYProgress, [0.28, 0.33], [0, 1]);
+  const copied = useTransform(scrollYProgress, [0.34, 0.37], [0, 1]);
 
-  /* Live counter for the "pick" act */
+  /* Live counter for the pick act */
   const count = useTransform(
     scrollYProgress,
-    [0.55, 0.62, 0.66, 0.70, 0.74],
+    [0.40, 0.46, 0.51, 0.56, 0.60],
     [0, 3, 8, 15, 24]
   );
   const [displayCount, setDisplayCount] = useState(0);
   useMotionValueEvent(count, "change", (v) => setDisplayCount(Math.round(v)));
 
-  /* Flying photos (act: upload) */
+  /* Flying photos converge into the laptop during upload act */
   const flyOpacity = useTransform(
     scrollYProgress,
     [0, 0.04, 0.14, 0.18],
@@ -148,9 +122,9 @@ function ProductStory() {
   );
 
   return (
-    <div ref={ref} className="relative" style={{ height: "560vh" }}>
+    <div ref={ref} className="relative" style={{ height: "650vh" }}>
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
-        {/* Flying photos converge into the laptop during upload act */}
+        {/* Flying photos (upload act) */}
         <FlyingPhotos opacity={flyOpacity} progress={scrollYProgress} />
 
         {/* Laptop — the throughline */}
@@ -158,64 +132,34 @@ function ProductStory() {
           style={{
             scale: laptopScale,
             y: laptopY,
-            opacity: laptopOpacity
+            opacity: laptopOpacity,
+            x: laptopX,
+            rotate: laptopRotate
           }}
           className="relative origin-center"
         >
-          <motion.div
-            style={{
-              x: laptopX,
-              rotate: laptopRotate,
-              opacity: laptopMainOpacity
-            }}
-            className="origin-center"
-          >
-            <LaptopFrame>
-              <CreatorView
-                progress={scrollYProgress}
-                count={displayCount}
-                act={act}
-              />
-            </LaptopFrame>
-          </motion.div>
+          <LaptopFrame>
+            <CreatorView progress={scrollYProgress} count={displayCount} act={act} />
+          </LaptopFrame>
         </motion.div>
 
-        {/* Share panel */}
+        {/* Share panel — slides in during share act */}
         <motion.div
           style={{ opacity: panelOpacity, x: panelX }}
-          className="absolute right-[6%] top-[28%] z-30 w-[280px] md:right-[12%]"
+          className="pointer-events-none absolute right-[6%] top-[28%] z-30 w-[280px] md:right-[10%]"
         >
           <SharePanel passwordOn={passwordOn} copied={copied} />
         </motion.div>
 
-        {/* Phone */}
-        <motion.div
-          style={{
-            opacity: phoneOpacity,
-            x: phoneX,
-            scale: phoneScale,
-            rotate: phoneRotate
-          }}
-          className="absolute right-[4%] top-1/2 z-30 -translate-y-1/2 md:right-[12%]"
-        >
-          <PhoneFrame>
-            <ClientView
-              count={displayCount}
-              progress={scrollYProgress}
-              interactive
-            />
-          </PhoneFrame>
-        </motion.div>
-
-        {/* Section text overlays — one at a time */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-40 px-6 pt-[14vh] md:px-10">
+        {/* Text overlay — one at a time */}
+        <div className="pointer-events-none absolute inset-x-0 top-[10vh] z-40 px-6 md:top-[12vh] md:px-10">
           <AnimatePresence mode="wait">
             {act === "upload" && (
               <SectionCopy
                 key="upload"
                 eyebrow="01 — Upload"
                 title="Upload once."
-                sub="Drop your photos in. PICKA turns them into a clean gallery."
+                sub="Drag. Drop. Done."
               />
             )}
             {act === "share" && (
@@ -223,32 +167,32 @@ function ProductStory() {
                 key="share"
                 eyebrow="02 — Share"
                 title="Share instantly."
-                sub="Send one private link. Add a password when you want control."
-              />
-            )}
-            {act === "browse" && (
-              <SectionCopy
-                key="browse"
-                eyebrow="03 — Browse"
-                title="Anyone can browse."
-                sub="No app. No account. Just open the link and view the gallery."
+                sub="One gallery. One link."
               />
             )}
             {act === "pick" && (
               <SectionCopy
                 key="pick"
-                eyebrow="04 — Pick"
+                eyebrow="03 — Pick"
                 title="Pick what matters."
-                sub="People save their favourites with one tap."
+                sub="Your people heart their favourites with one tap."
                 pillLabel={`${displayCount} selected`}
               />
             )}
-            {act === "see" && (
+            {act === "favorites" && (
               <SectionCopy
-                key="see"
-                eyebrow="05 — See every pick"
-                title="See every pick."
-                sub="Open the selected set and know exactly what to deliver."
+                key="favorites"
+                eyebrow="04 — Favorites"
+                title="Your favorites, organised."
+                sub="The keepers, surfaced. The rest, gently out of the way."
+              />
+            )}
+            {act === "reveal" && (
+              <SectionCopy
+                key="reveal"
+                eyebrow="05 — Picka"
+                title="A better way to share photos."
+                sub=""
               />
             )}
           </AnimatePresence>
@@ -283,17 +227,19 @@ function SectionCopy({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      exit={{ opacity: 0, y: -12, filter: "blur(6px)" }}
-      transition={{ duration: 0.7, ease: EASE }}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.6, ease: EASE }}
       className="mx-auto max-w-3xl text-center"
     >
       <p className="text-[11px] uppercase tracking-[0.4em] text-mute">{eyebrow}</p>
-      <h2 className="mt-3 font-serif text-[clamp(2rem,5vw,4rem)] italic leading-[0.95] tracking-tightest">
+      <h2 className="mt-3 font-serif text-[clamp(2.25rem,5.5vw,4.5rem)] italic leading-[0.95] tracking-tightest">
         {title}
       </h2>
-      <p className="mx-auto mt-4 max-w-md text-sm text-ink/65 md:text-base">{sub}</p>
+      {sub && (
+        <p className="mx-auto mt-4 max-w-md text-sm text-ink/65 md:text-base">{sub}</p>
+      )}
       {pillLabel && (
         <p className="mt-4 inline-block rounded-full border border-clay/30 bg-clay/[0.08] px-4 py-1 text-[11px] uppercase tracking-[0.35em] text-clay">
           {pillLabel}
@@ -424,7 +370,7 @@ function SharePanel({
 
 function LaptopFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-[90vw] max-w-[720px] md:w-[70vw]">
+    <div className="relative w-[92vw] max-w-[820px] md:w-[72vw]">
       <div className="rounded-[14px] bg-ink p-2 shadow-[0_50px_120px_-30px_rgba(14,14,16,0.45)] ring-1 ring-ink">
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[8px] bg-paper">
           <div className="flex items-center gap-1.5 border-b border-ink/10 px-2.5 py-1.5">
@@ -448,25 +394,6 @@ function LaptopFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ─────────────── Phone frame ─────────────── */
-
-function PhoneFrame({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative w-[230px]">
-      <div className="rounded-[2.25rem] bg-ink p-1.5 shadow-[0_50px_100px_-25px_rgba(14,14,16,0.5)] ring-1 ring-ink/30">
-        <div className="relative overflow-hidden rounded-[2rem] bg-paper">
-          <div className="flex items-center justify-between px-5 pb-1 pt-2.5 text-[8px] font-medium text-ink/80">
-            <span>9:41</span>
-            <span className="ml-1 inline-block h-1 w-2.5 rounded-sm bg-ink/80" />
-          </div>
-          {children}
-        </div>
-        <div className="absolute left-1/2 top-0 z-10 h-4 w-20 -translate-x-1/2 rounded-b-2xl bg-ink" />
-      </div>
-    </div>
-  );
-}
-
 /* ─────────────── Creator (laptop) view ─────────────── */
 
 function CreatorView({
@@ -478,9 +405,9 @@ function CreatorView({
   count: number;
   act: Act;
 }) {
-  const showPicksMode = act === "see";
+  const showCounter = act === "pick" || act === "favorites" || act === "reveal";
   return (
-    <div className="flex h-[calc(100%-1.75rem)] flex-col">
+    <div className="relative flex h-[calc(100%-1.75rem)] flex-col">
       <div className="flex items-center justify-between border-b border-ink/10 px-3 py-2">
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -490,7 +417,7 @@ function CreatorView({
             <p className="mt-0.5 text-[7px] text-mute">for Sarah Chen</p>
           </div>
         </div>
-        {showPicksMode && (
+        {showCounter && (
           <div className="flex items-center gap-1.5 rounded-full border border-clay/30 bg-clay/[0.08] px-2 py-0.5">
             <HeartGlyph className="h-2.5 w-2.5 text-clay" />
             <span className="text-[9px] font-semibold tabular-nums text-clay">
@@ -502,169 +429,138 @@ function CreatorView({
 
       <div className="relative grid flex-1 grid-cols-3 gap-1 p-1.5">
         {PHOTOS.map((src, i) => (
-          <UploadGridPhoto
+          <LaptopPhoto
             key={i}
             src={src}
             index={i}
             progress={progress}
-            dimUnpicked={showPicksMode}
-            picked={PICKED.has(i)}
+            picked={PICKED_SET.has(i)}
           />
         ))}
+        {/* Animated cursor during pick act */}
+        <Cursor progress={progress} />
       </div>
     </div>
   );
 }
 
-function UploadGridPhoto({
+function LaptopPhoto({
   src,
   index,
   progress,
-  dimUnpicked,
   picked
 }: {
   src: string;
   index: number;
   progress: MotionValue<number>;
-  dimUnpicked: boolean;
   picked: boolean;
 }) {
   /* Photos fade in during the upload act, staggered per index */
   const enterStart = 0.06 + index * 0.012;
-  const enterOpacity = useTransform(progress, [enterStart, enterStart + 0.04], [0, 1]);
-  /* In see-picks act, non-picked photos dim */
+  const baseOpacity = useTransform(progress, [enterStart, enterStart + 0.04], [0, 1]);
+
+  /* In the favorites act, non-picked dim. In reveal act, everything comes back. */
   const finalOpacity = useTransform(
     progress,
-    [0.78, 0.82],
-    [1, picked ? 1 : 0.2]
+    [0.60, 0.66, 0.82, 0.88],
+    picked ? [1, 1, 1, 1] : [1, 0.18, 0.18, 0.5]
+  );
+  const opacity = useTransform([baseOpacity, finalOpacity] as const, ([b, f]: number[]) =>
+    Math.min(b, f)
+  );
+
+  /* Picked ring strength: appears during favorites, fades a touch in reveal */
+  const ringOpacity = useTransform(
+    progress,
+    [0.55, 0.62, 0.85, 0.92],
+    picked ? [0, 1, 1, 0.6] : [0, 0, 0, 0]
+  );
+
+  /* Heart pop schedule for picked photos in pick act */
+  const pickedOrder = picked ? PICKED.indexOf(index as 0 | 2 | 4) : -1;
+  const heartStart = picked ? 0.44 + pickedOrder * 0.05 : 0;
+  const heartOpacity = useTransform(
+    progress,
+    picked ? [heartStart, heartStart + 0.02] : [0, 1],
+    picked ? [0, 1] : [0, 0]
+  );
+  const heartScale = useTransform(
+    progress,
+    picked
+      ? [heartStart, heartStart + 0.015, heartStart + 0.03]
+      : [0, 1],
+    picked ? [0.3, 1.3, 1] : [0, 0]
   );
 
   return (
     <motion.div
-      style={{
-        opacity: dimUnpicked
-          ? finalOpacity
-          : enterOpacity
-      }}
-      className={`relative overflow-hidden rounded ${
-        dimUnpicked && picked ? "ring-2 ring-clay" : ""
-      }`}
+      style={{ opacity }}
+      className="relative overflow-hidden rounded"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" className="block aspect-[4/5] h-full w-full object-cover" />
-      {dimUnpicked && picked && (
-        <div className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-clay text-paper shadow ring-1 ring-paper">
-          <HeartGlyph className="h-2 w-2" />
-        </div>
+
+      {picked && (
+        <motion.span
+          style={{ opacity: ringOpacity }}
+          className="pointer-events-none absolute inset-0 rounded ring-2 ring-clay ring-offset-0"
+          aria-hidden
+        />
+      )}
+      {picked && (
+        <motion.div
+          style={{ opacity: heartOpacity, scale: heartScale }}
+          className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-clay text-paper shadow ring-1 ring-paper"
+          aria-hidden
+        >
+          <HeartGlyph className="h-2.5 w-2.5" />
+        </motion.div>
       )}
     </motion.div>
   );
 }
 
-/* ─────────────── Client (phone) view ─────────────── */
+/* ─────────────── Animated cursor (pick act) ─────────────── */
 
-function ClientView({
-  count,
-  progress,
-  interactive
-}: {
-  count: number;
-  progress?: MotionValue<number>;
-  interactive?: boolean;
-}) {
-  return (
-    <div className="flex flex-col">
-      <div className="flex items-center justify-between border-b border-ink/10 px-3 pb-2 pt-1">
-        <div className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Picka." className="h-2.5 w-auto" />
-          <div className="border-l border-ink/15 pl-2">
-            <p className="text-[8px] font-bold leading-none">Sarah&rsquo;s Grad</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1 rounded-full border border-clay/30 bg-clay/[0.08] px-1.5 py-0.5">
-          <HeartGlyph className="h-2 w-2 text-clay" />
-          <span className="text-[8px] font-semibold tabular-nums text-clay">{count}</span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-1 p-1.5">
-        {PHOTOS.map((src, i) => (
-          <ClientPhotoCell
-            key={i}
-            src={src}
-            index={i}
-            progress={progress}
-            interactive={interactive}
-            picked={PICKED.has(i)}
-          />
-        ))}
-      </div>
-
-      <div className="border-t border-ink/10 p-2">
-        <div className="rounded-full bg-ink py-1.5 text-center text-[8px] font-semibold uppercase tracking-widest text-paper">
-          Send picks →
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ClientPhotoCell({
-  src,
-  index,
-  progress,
-  interactive,
-  picked
-}: {
-  src: string;
-  index: number;
-  progress?: MotionValue<number>;
-  interactive?: boolean;
-  picked: boolean;
-}) {
-  return (
-    <div className="relative">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" className="block aspect-square rounded-md object-cover" />
-      {picked && interactive && progress && (
-        <InteractiveHeart progress={progress} index={index} />
-      )}
-      {picked && !interactive && (
-        <div className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-clay text-paper shadow ring-1 ring-paper">
-          <HeartGlyph className="h-2 w-2" />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function InteractiveHeart({
-  progress,
-  index
-}: {
-  progress: MotionValue<number>;
-  index: number;
-}) {
-  const pickedIdx = [0, 2, 4].indexOf(index);
-  /* Hearts pop in sequence during the pick act (0.58 - 0.74) */
-  const heartStart = 0.60 + pickedIdx * 0.04;
-  const heartOpacity = useTransform(
+function Cursor({ progress }: { progress: MotionValue<number> }) {
+  /* Visible only during the pick act */
+  const opacity = useTransform(
     progress,
-    [heartStart, heartStart + 0.02],
-    [0, 1]
+    [0.40, 0.42, 0.60, 0.62],
+    [0, 1, 1, 0]
   );
-  const heartScale = useTransform(
+
+  /* Three-column grid, two rows:
+       col x: 17% / 50% / 83%
+       row y: 30% / 75%
+     Picked photos are indexes 0 (col 1 row 1), 2 (col 3 row 1), 4 (col 2 row 2).
+     The cursor visits each in sequence. */
+  const left = useTransform(
     progress,
-    [heartStart, heartStart + 0.015, heartStart + 0.03],
-    [0.3, 1.3, 1]
+    [0.40, 0.45, 0.50, 0.55, 0.60],
+    ["8%", "17%", "83%", "50%", "50%"]
   );
+  const top = useTransform(
+    progress,
+    [0.40, 0.45, 0.50, 0.55, 0.60],
+    ["10%", "30%", "30%", "75%", "75%"]
+  );
+
   return (
     <motion.div
-      style={{ opacity: heartOpacity, scale: heartScale }}
-      className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-clay text-paper shadow ring-1 ring-paper"
+      style={{ opacity, left, top }}
+      className="pointer-events-none absolute z-40 -translate-x-1 -translate-y-1"
+      aria-hidden
     >
-      <HeartGlyph className="h-2 w-2" />
+      <svg viewBox="0 0 18 22" className="h-5 w-5 drop-shadow-md">
+        <path
+          d="M2 2L16 14L9 14L7 20L2 2Z"
+          fill="#0e0e10"
+          stroke="#fafaf7"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+      </svg>
     </motion.div>
   );
 }
@@ -760,23 +656,14 @@ function Finale() {
           transition={{ duration: 1.0, delay: 0.25, ease: EASE }}
           className="mt-10 font-serif text-[clamp(2.5rem,7vw,5.5rem)] italic leading-[0.95] tracking-tightest"
         >
-          A better way <br className="hidden md:block" />
-          to share photos.
+          Ready to share <br className="hidden md:block" />
+          your first gallery?
         </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-25%" }}
-          transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
-          className="mt-6 max-w-md text-base text-ink/65 md:text-lg"
-        >
-          Create beautiful galleries and share them with anyone.
-        </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-25%" }}
-          transition={{ duration: 0.9, delay: 0.7, ease: EASE }}
+          transition={{ duration: 0.9, delay: 0.55, ease: EASE }}
         >
           <Link
             href="/admin"
