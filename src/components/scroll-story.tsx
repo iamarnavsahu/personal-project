@@ -18,7 +18,7 @@ const PHOTOS = [
   "/hero/photo-2.jpg",
   "/hero/photo-3.jpg",
   "/hero/photo-4.jpg",
-  "/hero/photo-1.jpg",
+  "/hero/photo-5.jpg",
   "/hero/photo-3.jpg"
 ];
 const PICKED_INDEXES = [0, 2, 4];
