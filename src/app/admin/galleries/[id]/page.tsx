@@ -9,6 +9,7 @@ import { PhotosGrid } from "./photos-grid";
 import { PasscodeUpdateForm } from "./passcode-update-form";
 import { GalleryDetailsForm } from "./gallery-details-form";
 import { PickLimitForm } from "./pick-limit-form";
+import { ShareLinkBox } from "./share-link-box";
 
 export default async function GalleryAdminPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
@@ -44,7 +45,6 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
     if (s.signedUrl && photos?.[i]) urlMap.set(photos[i].id, thumbnailUrl(s.signedUrl, 400));
   });
 
-  const shareUrl = `/g/${gallery.slug}`;
 
   return (
     <div className="space-y-8">
@@ -67,9 +67,13 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
 
       <div className="card">
         <h2 className="font-semibold">Share with your client</h2>
-        <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-center">
-          <code className="block truncate rounded bg-ink/5 px-3 py-2 text-sm">{shareUrl}</code>
-          <span className="text-sm text-ink/60">Passcode: set below</span>
+        <p className="mt-1 text-sm text-ink/60">
+          Tap <strong>Copy link</strong> then paste it into your text or email.
+          Send the passcode in a separate message.
+        </p>
+
+        <div className="mt-3">
+          <ShareLinkBox slug={gallery.slug} />
         </div>
 
         <PasscodeUpdateForm galleryId={gallery.id} />
