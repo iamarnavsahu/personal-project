@@ -44,40 +44,74 @@ export async function unlockGallery(slug: string, formData: FormData) {
 export async function togglePick(galleryId: string, photoId: string, slug: string) {
   // Check cookie
   if (cookies().get(cookieName(galleryId))?.value !== "1") {
-    return { error: "Locked" };
+    return { error: "Locked. Please enter the passcode again." };
   }
   const admin = getSupabaseAdmin();
 
-  // Pull the gallery's submit state + pick limit in one round trip
-  const { data: g } = await admin
+  // is_locked + pick_limit. If the pick_limit column hasn't been added yet,
+  // the second SELECT silently falls back to null (unlimited) so picking still works.
+  const { data: gBase, error: gErr } = await admin
     .from("galleries")
-    .select("is_locked, pick_limit")
+    .select("is_locked")
     .eq("id", galleryId)
     .single();
-  if (g?.is_locked) return { error: "Already submitted" };
+  if (gErr) {
+    console.error("[togglePick] gallery query error:", gErr);
+    return { error: "Could not load gallery. Refresh and try again." };
+  }
+  if (gBase?.is_locked) return { error: "You've already submitted your picks." };
 
-  const { data: existing } = await admin
+  let pickLimit: number | null = null;
+  const { data: gLimit } = await admin
+    .from("galleries")
+    .select("pick_limit")
+    .eq("id", galleryId)
+    .single();
+  if (gLimit && "pick_limit" in gLimit) {
+    pickLimit = (gLimit as { pick_limit: number | null }).pick_limit ?? null;
+  }
+
+  const { data: existing, error: selErr } = await admin
     .from("selections")
     .select("id")
     .eq("gallery_id", galleryId)
     .eq("photo_id", photoId)
     .maybeSingle();
+  if (selErr) {
+    console.error("[togglePick] selection lookup error:", selErr);
+    return { error: "Couldn't read your picks. Refresh and try again." };
+  }
 
   if (existing) {
     // Unpick — always allowed
-    await admin.from("selections").delete().eq("id", existing.id);
+    const { error: delErr } = await admin
+      .from("selections")
+      .delete()
+      .eq("id", existing.id);
+    if (delErr) {
+      console.error("[togglePick] delete error:", delErr);
+      return { error: "Couldn't unpick. Try again." };
+    }
   } else {
-    // Picking a new photo — enforce the pick_limit if one is set
-    if (g?.pick_limit != null) {
+    // Enforce the limit if one is set
+    if (pickLimit != null) {
       const { count } = await admin
         .from("selections")
         .select("id", { count: "exact", head: true })
         .eq("gallery_id", galleryId);
-      if ((count ?? 0) >= g.pick_limit) {
-        return { error: `You can only pick ${g.pick_limit} photo${g.pick_limit === 1 ? "" : "s"}.` };
+      if ((count ?? 0) >= pickLimit) {
+        return {
+          error: `You can only pick ${pickLimit} photo${pickLimit === 1 ? "" : "s"}.`
+        };
       }
     }
-    await admin.from("selections").insert({ gallery_id: galleryId, photo_id: photoId });
+    const { error: insErr } = await admin
+      .from("selections")
+      .insert({ gallery_id: galleryId, photo_id: photoId });
+    if (insErr) {
+      console.error("[togglePick] insert error:", insErr);
+      return { error: insErr.message };
+    }
   }
   revalidatePath(`/g/${slug}`);
   return { ok: true };
