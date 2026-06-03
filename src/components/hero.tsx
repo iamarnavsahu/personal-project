@@ -39,7 +39,7 @@ const CARDS: Card[] = [
     rotate: -3, depth: 18, blur: 2, opacity: 0.92, floatDur: 9
   },
   {
-    src: "/hero/photo-4.jpg",
+    src: "/hero/photo-5.jpg",
     cls: "top-[36%] right-[2%] w-28 md:w-40",
     rotate: 4, depth: 22, blur: 0, opacity: 1, floatDur: 7.5
   },
@@ -54,7 +54,7 @@ const CARDS: Card[] = [
     rotate: -5, depth: 28, blur: 0, opacity: 1, floatDur: 6.5
   },
   {
-    src: "/hero/photo-4.jpg",
+    src: "/hero/photo-1.jpg",
     cls: "top-[20%] left-[38%] w-20 md:w-28",
     rotate: 9, depth: 14, blur: 4, opacity: 0.5, floatDur: 10
   },
