@@ -7,13 +7,14 @@ import { togglePick, submitPicks, relockGallery } from "./actions";
 type Photo = { id: string; filename: string; url: string; fullUrl: string; picked: boolean };
 
 export function ClientGallery({
-  galleryId, slug, title, clientName, isLocked, photos
+  galleryId, slug, title, clientName, isLocked, pickLimit, photos
 }: {
   galleryId: string;
   slug: string;
   title: string;
   clientName: string | null;
   isLocked: boolean;
+  pickLimit: number | null;
   photos: Photo[];
 }) {
   const router = useRouter();
@@ -25,16 +26,31 @@ export function ClientGallery({
   );
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(isLocked);
+  const [toast, setToast] = useState<string | null>(null);
   const pickedCount = optimistic.filter((p) => p.picked).length;
+  const atLimit = pickLimit != null && pickedCount >= pickLimit;
   const touchStartX = useRef<number>(0);
 
   const currentPhoto = lightboxIdx !== null ? optimistic[lightboxIdx] : null;
 
+  function showToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2400);
+  }
+
   function toggle(p: Photo) {
     if (submitted) return;
+    // Block new picks at the limit (always allow unpicking)
+    if (!p.picked && atLimit) {
+      showToast(
+        `You can only pick ${pickLimit} photo${pickLimit === 1 ? "" : "s"}. Unpick one first.`
+      );
+      return;
+    }
     start(async () => {
       applyOptimistic(p.id);
-      await togglePick(galleryId, p.id, slug);
+      const res = await togglePick(galleryId, p.id, slug);
+      if (res?.error) showToast(res.error);
     });
   }
 
@@ -109,9 +125,21 @@ export function ClientGallery({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm">
-              <strong>{pickedCount}</strong> picked
-            </span>
+            <div className="text-right">
+              <div className="text-sm font-semibold tabular-nums">
+                <strong>{pickedCount}</strong>
+                {pickLimit != null && <span className="text-ink/40"> / {pickLimit}</span>}
+                <span className="ml-1 text-xs font-normal text-ink/60">picked</span>
+              </div>
+              {pickLimit != null && (
+                <div className="mt-1 h-1 w-32 overflow-hidden bg-ink/10">
+                  <div
+                    className={`h-full transition-all ${atLimit ? "bg-clay" : "bg-ink/70"}`}
+                    style={{ width: `${Math.min(100, (pickedCount / pickLimit) * 100)}%` }}
+                  />
+                </div>
+              )}
+            </div>
             {submitted ? (
               <span className="border border-ink/30 px-3 py-1 text-xs uppercase tracking-widest text-ink/70">✓ Submitted</span>
             ) : (
@@ -139,34 +167,52 @@ export function ClientGallery({
             </button>
           </div>
         </div>
+        {pickLimit != null && !submitted && (
+          <div className="border-t border-ink/5 bg-ink/[0.02]">
+            <div className="mx-auto max-w-6xl px-6 py-1.5 text-center text-xs text-ink/60">
+              {atLimit
+                ? `You've picked your ${pickLimit}. Unpick one to swap.`
+                : `Pick your top ${pickLimit} — ${pickLimit - pickedCount} left.`}
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         {!optimistic.length && <p className="text-ink/60">No photos in this gallery yet.</p>}
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-          {optimistic.map((p, idx) => (
-            <li key={p.id} className="group relative overflow-hidden rounded-md">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={p.url}
-                alt={p.filename}
-                loading="lazy"
-                decoding="async"
-                onClick={() => setLightboxIdx(idx)}
-                className="aspect-square w-full cursor-zoom-in bg-ink/5 object-cover"
-              />
-              <button
-                onClick={() => toggle(p)}
-                disabled={submitted}
-                aria-label={p.picked ? "Unpick" : "Pick"}
-                className={`absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full text-lg shadow transition ${
-                  p.picked ? "bg-ink text-paper" : "bg-paper/90 text-ink hover:bg-paper"
-                }`}
-              >
-                {p.picked ? "★" : "☆"}
-              </button>
-            </li>
-          ))}
+          {optimistic.map((p, idx) => {
+            const disabledNew = !p.picked && atLimit && !submitted;
+            return (
+              <li key={p.id} className="group relative overflow-hidden rounded-md">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={p.url}
+                  alt={p.filename}
+                  loading="lazy"
+                  decoding="async"
+                  onClick={() => setLightboxIdx(idx)}
+                  className={`aspect-square w-full cursor-zoom-in bg-ink/5 object-cover ${
+                    disabledNew ? "opacity-60" : ""
+                  }`}
+                />
+                <button
+                  onClick={() => toggle(p)}
+                  disabled={submitted}
+                  aria-label={p.picked ? "Unpick" : "Pick"}
+                  className={`absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full text-lg shadow transition ${
+                    p.picked
+                      ? "bg-clay text-paper"
+                      : disabledNew
+                      ? "bg-paper/70 text-ink/40"
+                      : "bg-paper/90 text-ink hover:bg-paper"
+                  }`}
+                >
+                  {p.picked ? "★" : "☆"}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </main>
 
@@ -233,12 +279,20 @@ export function ClientGallery({
           {/* Pick toggle */}
           <button
             onClick={(e) => { e.stopPropagation(); toggle(currentPhoto); }}
-            disabled={submitted}
+            disabled={submitted || (!currentPhoto.picked && atLimit)}
             className={`absolute bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-full px-6 py-2.5 text-sm font-medium shadow-lg transition ${
-              currentPhoto.picked ? "bg-clay text-paper" : "bg-paper text-ink hover:bg-white"
+              currentPhoto.picked
+                ? "bg-clay text-paper"
+                : !currentPhoto.picked && atLimit
+                ? "bg-paper/40 text-ink/40"
+                : "bg-paper text-ink hover:bg-white"
             }`}
           >
-            {currentPhoto.picked ? "★ Picked" : "☆ Pick this"}
+            {currentPhoto.picked
+              ? "★ Picked"
+              : atLimit
+              ? `Limit reached (${pickLimit})`
+              : "☆ Pick this"}
           </button>
 
           {/* Preload neighbours for snappier swipes / arrow taps */}
@@ -255,6 +309,13 @@ export function ClientGallery({
               />
             </div>
           )}
+        </div>
+      )}
+
+      {/* Toast for limit-reached + other inline errors */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 border border-ink bg-ink px-4 py-2 text-sm text-paper shadow-lg">
+          {toast}
         </div>
       )}
     </div>

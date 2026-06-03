@@ -11,7 +11,7 @@ export default async function PublicGalleryPage({ params }: { params: { slug: st
 
   const { data: gallery, error: gErr } = await admin
     .from("galleries")
-    .select("id, name, client_name, slug, is_locked")
+    .select("id, name, client_name, slug, is_locked, pick_limit")
     .eq("slug", params.slug)
     .single();
   if (gErr) console.error("[/g/[slug]] gallery query error:", gErr);
@@ -76,6 +76,7 @@ export default async function PublicGalleryPage({ params }: { params: { slug: st
         title={gallery.name}
         clientName={gallery.client_name}
         isLocked={gallery.is_locked}
+        pickLimit={gallery.pick_limit}
         photos={items}
       />
     </>

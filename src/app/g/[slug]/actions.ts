@@ -48,8 +48,12 @@ export async function togglePick(galleryId: string, photoId: string, slug: strin
   }
   const admin = getSupabaseAdmin();
 
-  // Don't allow changes after submit
-  const { data: g } = await admin.from("galleries").select("is_locked").eq("id", galleryId).single();
+  // Pull the gallery's submit state + pick limit in one round trip
+  const { data: g } = await admin
+    .from("galleries")
+    .select("is_locked, pick_limit")
+    .eq("id", galleryId)
+    .single();
   if (g?.is_locked) return { error: "Already submitted" };
 
   const { data: existing } = await admin
@@ -60,8 +64,19 @@ export async function togglePick(galleryId: string, photoId: string, slug: strin
     .maybeSingle();
 
   if (existing) {
+    // Unpick — always allowed
     await admin.from("selections").delete().eq("id", existing.id);
   } else {
+    // Picking a new photo — enforce the pick_limit if one is set
+    if (g?.pick_limit != null) {
+      const { count } = await admin
+        .from("selections")
+        .select("id", { count: "exact", head: true })
+        .eq("gallery_id", galleryId);
+      if ((count ?? 0) >= g.pick_limit) {
+        return { error: `You can only pick ${g.pick_limit} photo${g.pick_limit === 1 ? "" : "s"}.` };
+      }
+    }
     await admin.from("selections").insert({ gallery_id: galleryId, photo_id: photoId });
   }
   revalidatePath(`/g/${slug}`);

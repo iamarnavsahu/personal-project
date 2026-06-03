@@ -14,6 +14,8 @@ export async function createGallery(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   const clientName = String(formData.get("client_name") || "").trim() || null;
   const passcode = String(formData.get("passcode") || "").trim();
+  const rawLimit = String(formData.get("pick_limit") || "").trim();
+  const pickLimit = rawLimit ? Math.max(1, parseInt(rawLimit, 10)) : null;
 
   if (!name) throw new Error("Name required");
   if (passcode.length < 4) throw new Error("Passcode must be at least 4 characters");
@@ -25,12 +27,47 @@ export async function createGallery(formData: FormData) {
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
     .from("galleries")
-    .insert({ owner_id: user.id, slug, name, client_name: clientName, passcode_hash })
+    .insert({
+      owner_id: user.id,
+      slug,
+      name,
+      client_name: clientName,
+      passcode_hash,
+      pick_limit: pickLimit
+    })
     .select("id")
     .single();
 
   if (error) throw new Error(error.message);
   redirect(`/admin/galleries/${data!.id}`);
+}
+
+export async function updatePickLimit(galleryId: string, formData: FormData) {
+  const user = await requireUser();
+  const raw = String(formData.get("pick_limit") || "").trim();
+  const pick_limit = raw === "" ? null : Math.max(1, parseInt(raw, 10));
+  if (pick_limit !== null && Number.isNaN(pick_limit)) {
+    return { error: "Limit must be a whole number or empty" };
+  }
+
+  const admin = getSupabaseAdmin();
+  const { data: gallery } = await admin
+    .from("galleries")
+    .select("id, slug")
+    .eq("id", galleryId)
+    .eq("owner_id", user.id)
+    .single();
+  if (!gallery) return { error: "Gallery not found" };
+
+  const { error } = await admin
+    .from("galleries")
+    .update({ pick_limit })
+    .eq("id", galleryId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/galleries/${galleryId}`);
+  revalidatePath(`/g/${gallery.slug}`);
+  return { ok: true, value: pick_limit };
 }
 
 export async function uploadPhotos(formData: FormData) {

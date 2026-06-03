@@ -12,8 +12,13 @@ create table if not exists public.galleries (
   passcode_hash text not null,
   cover_photo_id uuid,
   is_locked boolean not null default false, -- true once client submits picks
+  pick_limit int, -- null = unlimited; otherwise max photos client may pick
   created_at timestamptz not null default now()
 );
+
+-- Migration for existing projects (safe to run repeatedly)
+alter table public.galleries
+  add column if not exists pick_limit int;
 
 -- Photos: JPEG previews in storage; one row per photo
 create table if not exists public.photos (

@@ -8,6 +8,7 @@ import { Uploader } from "./uploader";
 import { PhotosGrid } from "./photos-grid";
 import { PasscodeUpdateForm } from "./passcode-update-form";
 import { GalleryDetailsForm } from "./gallery-details-form";
+import { PickLimitForm } from "./pick-limit-form";
 
 export default async function GalleryAdminPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
@@ -73,6 +74,8 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
 
         <PasscodeUpdateForm galleryId={gallery.id} />
       </div>
+
+      <PickLimitForm galleryId={gallery.id} current={gallery.pick_limit ?? null} />
 
       <div>
         <h2 className="font-semibold">Upload photos</h2>
