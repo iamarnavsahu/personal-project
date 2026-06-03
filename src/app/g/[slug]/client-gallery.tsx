@@ -2,7 +2,10 @@
 
 import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { togglePick, submitPicks, relockGallery } from "./actions";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 type Photo = { id: string; filename: string; url: string; fullUrl: string; picked: boolean };
 
@@ -26,6 +29,7 @@ export function ClientGallery({
   );
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(isLocked);
+  const [justSubmitted, setJustSubmitted] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const pickedCount = optimistic.filter((p) => p.picked).length;
   const atLimit = pickLimit != null && pickedCount >= pickLimit;
@@ -102,13 +106,16 @@ export function ClientGallery({
 
   function onSubmit() {
     if (!pickedCount) {
-      alert("Pick at least one photo first.");
+      showToast("Pick at least one photo first.");
       return;
     }
     if (!confirm(`Send ${pickedCount} favorite${pickedCount === 1 ? "" : "s"} to your photographer? You won't be able to change them after.`)) return;
     start(async () => {
       await submitPicks(galleryId, slug);
       setSubmitted(true);
+      setJustSubmitted(true);
+      // Auto-dismiss after 4.5s — fade-out runs another 0.8s on top.
+      setTimeout(() => setJustSubmitted(false), 4500);
     });
   }
 
@@ -318,6 +325,46 @@ export function ClientGallery({
           {toast}
         </div>
       )}
+
+      {/* Just-submitted thank-you overlay */}
+      <AnimatePresence>
+        {justSubmitted && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: EASE }}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-paper px-6 text-center"
+            aria-live="polite"
+            role="status"
+          >
+            <motion.img
+              src="/logo.png"
+              alt="Picka."
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.9, delay: 0.2, ease: EASE }}
+              className="h-12 w-auto md:h-16"
+            />
+            <motion.h2
+              initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
+              className="mt-10 max-w-2xl font-serif text-3xl italic leading-tight tracking-tightest md:text-5xl"
+            >
+              Thank you for picking your photos.
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.95, ease: EASE }}
+              className="mt-4 max-w-md text-base text-ink/60 md:text-lg"
+            >
+              Your photographer will be notified.
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
