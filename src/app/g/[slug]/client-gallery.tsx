@@ -30,6 +30,8 @@ export function ClientGallery({
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(isLocked);
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [justDownloaded, setJustDownloaded] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const pickedCount = optimistic.filter((p) => p.picked).length;
   const atLimit = pickLimit != null && pickedCount >= pickLimit;
@@ -104,6 +106,64 @@ export function ClientGallery({
     else next();
   }
 
+  async function onDownloadAll() {
+    if (!photos.length || downloadProgress !== null) return;
+    if (!confirm(
+      `Download all ${photos.length} photos as a single .zip? On a slow connection this can take a few minutes.`
+    )) return;
+    setDownloadProgress(0);
+    try {
+      // Lazy-load JSZip so visitors who don't download skip the bundle cost.
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
+      let done = 0;
+      const concurrency = 4;
+      let cursor = 0;
+      const total = photos.length;
+
+      async function worker() {
+        while (cursor < total) {
+          const i = cursor++;
+          const p = photos[i];
+          try {
+            const res = await fetch(p.fullUrl || p.url);
+            const blob = await res.blob();
+            // Prefix with the index so filename collisions don't stomp.
+            const name = p.filename || `photo-${i + 1}.jpg`;
+            zip.file(`${String(i + 1).padStart(4, "0")}-${name}`, blob);
+          } catch (e) {
+            console.error("[download] failed to fetch", p.filename, e);
+          }
+          done++;
+          setDownloadProgress(Math.round((done / total) * 100));
+        }
+      }
+      await Promise.all(Array.from({ length: concurrency }, worker));
+
+      const zipBlob = await zip.generateAsync({
+        type: "blob",
+        // JPEGs are already compressed; STORE skips the costly re-compression.
+        compression: "STORE"
+      });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title.replace(/[^a-z0-9-]+/gi, "-").replace(/^-|-$/g, "")}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setDownloadProgress(null);
+      setJustDownloaded(true);
+      setTimeout(() => setJustDownloaded(false), 4500);
+    } catch (e: any) {
+      console.error("[download] error", e);
+      setDownloadProgress(null);
+      showToast(e?.message || "Download failed. Try again?");
+    }
+  }
+
   function onSubmit() {
     if (!pickedCount) {
       showToast("Pick at least one photo first.");
@@ -154,6 +214,20 @@ export function ClientGallery({
                 Submit picks
               </button>
             )}
+            <button
+              onClick={onDownloadAll}
+              disabled={downloadProgress !== null || !photos.length}
+              title="Download every photo as a .zip"
+              aria-label="Download all photos"
+              className="flex h-8 items-center gap-1.5 rounded-full border border-ink/15 px-3 text-[10px] uppercase tracking-[0.2em] text-ink/70 transition hover:border-ink hover:text-ink disabled:cursor-wait disabled:opacity-60"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                <path d="M12 3v12M6 11l6 6 6-6M5 21h14" />
+              </svg>
+              {downloadProgress !== null
+                ? `${downloadProgress}%`
+                : "Download all"}
+            </button>
             <button
               onClick={() => {
                 if (!confirm("Sign out of this gallery? You'll need the passcode again to view it.")) return;
@@ -361,6 +435,46 @@ export function ClientGallery({
               className="mt-4 max-w-md text-base text-ink/60 md:text-lg"
             >
               Your photographer will be notified.
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Just-downloaded thank-you overlay */}
+      <AnimatePresence>
+        {justDownloaded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: EASE }}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-paper px-6 text-center"
+            aria-live="polite"
+            role="status"
+          >
+            <motion.img
+              src="/logo.png"
+              alt="Picka."
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.9, delay: 0.2, ease: EASE }}
+              className="h-12 w-auto md:h-16"
+            />
+            <motion.h2
+              initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
+              className="mt-10 max-w-2xl font-serif text-3xl italic leading-tight tracking-tightest md:text-5xl"
+            >
+              Thank you for downloading!
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.95, ease: EASE }}
+              className="mt-4 max-w-md text-base text-ink/60 md:text-lg"
+            >
+              Hope you loved your photos.
             </motion.p>
           </motion.div>
         )}
