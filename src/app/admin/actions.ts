@@ -79,6 +79,32 @@ export async function uploadPhotos(formData: FormData) {
   revalidatePath(`/admin/galleries/${galleryId}`);
 }
 
+export async function renameGallery(galleryId: string, formData: FormData) {
+  const user = await requireUser();
+  const name = String(formData.get("name") || "").trim();
+  const clientName = String(formData.get("client_name") || "").trim() || null;
+  if (!name) return { error: "Name can't be empty" };
+
+  const admin = getSupabaseAdmin();
+  const { data: gallery } = await admin
+    .from("galleries")
+    .select("id, slug")
+    .eq("id", galleryId)
+    .eq("owner_id", user.id)
+    .single();
+  if (!gallery) return { error: "Gallery not found" };
+
+  const { error } = await admin
+    .from("galleries")
+    .update({ name, client_name: clientName })
+    .eq("id", galleryId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/galleries/${galleryId}`);
+  revalidatePath(`/g/${gallery.slug}`);
+  return { ok: true };
+}
+
 export async function updatePasscode(galleryId: string, formData: FormData) {
   const user = await requireUser();
   const passcode = String(formData.get("passcode") || "").trim();

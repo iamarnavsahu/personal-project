@@ -7,6 +7,7 @@ import { thumbnailUrl } from "@/lib/storage";
 import { Uploader } from "./uploader";
 import { PhotosGrid } from "./photos-grid";
 import { PasscodeUpdateForm } from "./passcode-update-form";
+import { GalleryDetailsForm } from "./gallery-details-form";
 
 export default async function GalleryAdminPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
@@ -56,6 +57,12 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
           <button className="btn btn-ghost text-sm text-red-600">Delete gallery</button>
         </form>
       </div>
+
+      <GalleryDetailsForm
+        galleryId={gallery.id}
+        name={gallery.name}
+        clientName={gallery.client_name}
+      />
 
       <div className="card">
         <h2 className="font-semibold">Share with your client</h2>
