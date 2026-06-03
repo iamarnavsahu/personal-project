@@ -11,6 +11,7 @@ import { GalleryDetailsForm } from "./gallery-details-form";
 import { PickLimitForm } from "./pick-limit-form";
 import { ShareLinkBox } from "./share-link-box";
 import { SlugForm } from "./slug-form";
+import { SubmitStatus } from "./submit-status";
 
 export default async function GalleryAdminPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
@@ -59,6 +60,12 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
           <button className="btn btn-ghost text-sm text-red-600">Delete gallery</button>
         </form>
       </div>
+
+      <SubmitStatus
+        galleryId={gallery.id}
+        isLocked={!!gallery.is_locked}
+        pickedCount={pickedIds.size}
+      />
 
       <GalleryDetailsForm
         galleryId={gallery.id}

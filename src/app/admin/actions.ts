@@ -260,6 +260,28 @@ export async function deletePhoto(photoId: string) {
   revalidatePath(`/admin/galleries/${photo.gallery_id}`);
 }
 
+export async function unlockGallery(galleryId: string) {
+  const user = await requireUser();
+  const admin = getSupabaseAdmin();
+  const { data: gallery } = await admin
+    .from("galleries")
+    .select("id, slug")
+    .eq("id", galleryId)
+    .eq("owner_id", user.id)
+    .single();
+  if (!gallery) return { error: "Gallery not found" };
+
+  const { error } = await admin
+    .from("galleries")
+    .update({ is_locked: false })
+    .eq("id", galleryId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/galleries/${galleryId}`);
+  revalidatePath(`/g/${gallery.slug}`);
+  return { ok: true };
+}
+
 export async function bulkDeletePhotos(galleryId: string, photoIds: string[]) {
   const user = await requireUser();
   if (!photoIds.length) return { ok: true, deleted: 0 };
