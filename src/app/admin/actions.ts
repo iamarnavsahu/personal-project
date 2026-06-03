@@ -97,7 +97,18 @@ export async function uploadPhotos(formData: FormData) {
     .single();
   if (gErr || !gallery) throw new Error("Gallery not found");
 
-  // Get current max sort_order to append
+  // Validate every file up-front so we don't half-upload a batch.
+  for (const file of files) {
+    const mime = file.type.toLowerCase();
+    if (!ALLOWED_IMAGE_MIME.has(mime)) {
+      throw new Error(`${file.name} is not a supported image type.`);
+    }
+    if (file.size > MAX_FILE_BYTES) {
+      throw new Error(`${file.name} is larger than 25 MB.`);
+    }
+  }
+
+  // Reserve a contiguous block of sort_order values for this batch.
   const { data: maxRow } = await admin
     .from("photos")
     .select("sort_order")
@@ -105,34 +116,33 @@ export async function uploadPhotos(formData: FormData) {
     .order("sort_order", { ascending: false })
     .limit(1)
     .maybeSingle();
-  let nextOrder = (maxRow?.sort_order ?? -1) + 1;
+  const baseOrder = (maxRow?.sort_order ?? -1) + 1;
 
-  for (const file of files) {
-    // Mimetype gate: refuse anything that isn't a recognised image.
-    const mime = file.type.toLowerCase();
-    if (!ALLOWED_IMAGE_MIME.has(mime)) {
-      throw new Error(`${file.name} is not a supported image type.`);
-    }
-    // Size gate: cap per-file to prevent a single huge upload bombing storage.
-    if (file.size > MAX_FILE_BYTES) {
-      throw new Error(`${file.name} is larger than 25 MB.`);
-    }
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${galleryId}/${crypto.randomUUID()}.${ext}`;
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const { error: upErr } = await admin.storage
-      .from(BUCKET)
-      .upload(path, bytes, { contentType: mime || "image/jpeg", upsert: false });
-    if (upErr) throw new Error(upErr.message);
+  // Upload all files in parallel. This is the real speedup — the previous
+  // for/await version uploaded one at a time, so a 5-file chunk took ~5x
+  // longer than necessary.
+  const rows = await Promise.all(
+    files.map(async (file, i) => {
+      const mime = file.type.toLowerCase();
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${galleryId}/${crypto.randomUUID()}.${ext}`;
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const { error: upErr } = await admin.storage
+        .from(BUCKET)
+        .upload(path, bytes, { contentType: mime || "image/jpeg", upsert: false });
+      if (upErr) throw new Error(upErr.message);
+      return {
+        gallery_id: galleryId,
+        storage_path: path,
+        filename: file.name,
+        sort_order: baseOrder + i
+      };
+    })
+  );
 
-    const { error: insErr } = await admin.from("photos").insert({
-      gallery_id: galleryId,
-      storage_path: path,
-      filename: file.name,
-      sort_order: nextOrder++
-    });
-    if (insErr) throw new Error(insErr.message);
-  }
+  // Single bulk INSERT instead of N round-trips.
+  const { error: insErr } = await admin.from("photos").insert(rows);
+  if (insErr) throw new Error(insErr.message);
 
   revalidatePath(`/admin/galleries/${galleryId}`);
 }

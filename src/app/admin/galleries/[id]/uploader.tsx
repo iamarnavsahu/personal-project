@@ -18,18 +18,35 @@ export function Uploader({ galleryId }: { galleryId: string }) {
     setErr(null);
     const arr = Array.from(files);
 
-    // Upload in chunks of 5 to keep server actions snappy
+    // Upload in chunks of 12 — each chunk uploads its files in parallel
+    // on the server, so the wall-clock time scales with chunk count, not
+    // file count. Two chunks fire concurrently as well.
     start(async () => {
       try {
-        const chunkSize = 5;
+        const chunkSize = 12;
+        const chunks: File[][] = [];
         for (let i = 0; i < arr.length; i += chunkSize) {
-          const chunk = arr.slice(i, i + chunkSize);
-          setProgress(`Uploading ${i + 1}–${Math.min(i + chunk.length, arr.length)} of ${arr.length}…`);
-          const fd = new FormData();
-          fd.append("galleryId", galleryId);
-          chunk.forEach((file) => fd.append("files", file));
-          await uploadPhotos(fd);
+          chunks.push(arr.slice(i, i + chunkSize));
         }
+
+        let done = 0;
+        // Two-at-a-time concurrency on the client side too.
+        const concurrency = 2;
+        let cursor = 0;
+        async function worker() {
+          while (cursor < chunks.length) {
+            const idx = cursor++;
+            const chunk = chunks[idx];
+            const fd = new FormData();
+            fd.append("galleryId", galleryId);
+            chunk.forEach((file) => fd.append("files", file));
+            await uploadPhotos(fd);
+            done += chunk.length;
+            setProgress(`Uploaded ${done} of ${arr.length}…`);
+          }
+        }
+        await Promise.all(Array.from({ length: concurrency }, worker));
+
         setProgress("");
         router.refresh();
       } catch (e: any) {
