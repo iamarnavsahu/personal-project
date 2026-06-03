@@ -70,18 +70,30 @@ export async function updatePickLimit(galleryId: string, formData: FormData) {
   return { ok: true, value: pick_limit };
 }
 
+const ALLOWED_IMAGE_MIME = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif"
+]);
+const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB per file
+
 export async function uploadPhotos(formData: FormData) {
-  await requireUser();
+  const user = await requireUser();
   const galleryId = String(formData.get("galleryId") || "");
   const files = formData.getAll("files").filter((f): f is File => f instanceof File);
   if (!galleryId) throw new Error("Missing galleryId");
   if (!files.length) throw new Error("No files");
   const admin = getSupabaseAdmin();
 
+  // Ownership check: only the user who owns this gallery may upload.
   const { data: gallery, error: gErr } = await admin
     .from("galleries")
     .select("id, owner_id")
     .eq("id", galleryId)
+    .eq("owner_id", user.id)
     .single();
   if (gErr || !gallery) throw new Error("Gallery not found");
 
@@ -96,12 +108,21 @@ export async function uploadPhotos(formData: FormData) {
   let nextOrder = (maxRow?.sort_order ?? -1) + 1;
 
   for (const file of files) {
+    // Mimetype gate: refuse anything that isn't a recognised image.
+    const mime = file.type.toLowerCase();
+    if (!ALLOWED_IMAGE_MIME.has(mime)) {
+      throw new Error(`${file.name} is not a supported image type.`);
+    }
+    // Size gate: cap per-file to prevent a single huge upload bombing storage.
+    if (file.size > MAX_FILE_BYTES) {
+      throw new Error(`${file.name} is larger than 25 MB.`);
+    }
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${galleryId}/${crypto.randomUUID()}.${ext}`;
     const bytes = new Uint8Array(await file.arrayBuffer());
     const { error: upErr } = await admin.storage
       .from(BUCKET)
-      .upload(path, bytes, { contentType: file.type || "image/jpeg", upsert: false });
+      .upload(path, bytes, { contentType: mime || "image/jpeg", upsert: false });
     if (upErr) throw new Error(upErr.message);
 
     const { error: insErr } = await admin.from("photos").insert({
@@ -217,7 +238,7 @@ export async function updatePasscode(galleryId: string, formData: FormData) {
 }
 
 export async function deletePhoto(photoId: string) {
-  await requireUser();
+  const user = await requireUser();
   const admin = getSupabaseAdmin();
   const { data: photo } = await admin
     .from("photos")
@@ -225,6 +246,15 @@ export async function deletePhoto(photoId: string) {
     .eq("id", photoId)
     .single();
   if (!photo) return;
+  // Ownership check: confirm the user owns the gallery this photo belongs to.
+  const { data: gallery } = await admin
+    .from("galleries")
+    .select("owner_id")
+    .eq("id", photo.gallery_id)
+    .single();
+  if (!gallery || gallery.owner_id !== user.id) {
+    throw new Error("Not authorized");
+  }
   await admin.storage.from(BUCKET).remove([photo.storage_path]);
   await admin.from("photos").delete().eq("id", photoId);
   revalidatePath(`/admin/galleries/${photo.gallery_id}`);
@@ -266,8 +296,17 @@ export async function bulkDeletePhotos(galleryId: string, photoIds: string[]) {
 }
 
 export async function deleteGallery(galleryId: string) {
-  await requireUser();
+  const user = await requireUser();
   const admin = getSupabaseAdmin();
+  // Ownership check before any destructive action.
+  const { data: gallery } = await admin
+    .from("galleries")
+    .select("id")
+    .eq("id", galleryId)
+    .eq("owner_id", user.id)
+    .single();
+  if (!gallery) throw new Error("Not authorized");
+
   const { data: photos } = await admin
     .from("photos")
     .select("storage_path")
