@@ -1,26 +1,23 @@
 /**
  * Wrap a Supabase signed object URL into a transformed thumbnail.
+ * Requires the project to be on the Supabase Pro plan (Image
+ * Transformations are a Pro-tier feature).
  *
- * NOTE: Supabase Image Transformations are a Pro-tier feature. On the
- * Free tier the /render/image/sign/ endpoint returns 404, so we keep
- * this as a passthrough until the project is upgraded.
- *
- * When you move to Pro, re-enable the resize by uncommenting the
- * block below and removing the early return.
+ * The same JWT used for /object/sign/ is accepted by
+ * /render/image/sign/, so we swap the path and append width,
+ * height, resize mode, and quality. On the Free tier this URL
+ * 404s — flip the early return back on if you ever downgrade.
  */
-export function thumbnailUrl(signedUrl: string, _size: number): string {
-  return signedUrl;
-
-  // --- Re-enable on Supabase Pro ---
-  // try {
-  //   const url = new URL(signedUrl);
-  //   url.pathname = url.pathname.replace("/object/sign/", "/render/image/sign/");
-  //   url.searchParams.set("width", String(_size));
-  //   url.searchParams.set("height", String(_size));
-  //   url.searchParams.set("resize", "cover");
-  //   url.searchParams.set("quality", "70");
-  //   return url.toString();
-  // } catch {
-  //   return signedUrl;
-  // }
+export function thumbnailUrl(signedUrl: string, size: number): string {
+  try {
+    const url = new URL(signedUrl);
+    url.pathname = url.pathname.replace("/object/sign/", "/render/image/sign/");
+    url.searchParams.set("width", String(size));
+    url.searchParams.set("height", String(size));
+    url.searchParams.set("resize", "cover");
+    url.searchParams.set("quality", "70");
+    return url.toString();
+  } catch {
+    return signedUrl;
+  }
 }
