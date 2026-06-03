@@ -116,6 +116,54 @@ export async function uploadPhotos(formData: FormData) {
   revalidatePath(`/admin/galleries/${galleryId}`);
 }
 
+export async function updateGallerySlug(galleryId: string, formData: FormData) {
+  const user = await requireUser();
+  const raw = String(formData.get("slug") || "").trim().toLowerCase();
+  // Normalize: replace whitespace/underscores with -, strip anything else
+  const slug = raw
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (slug.length < 3) return { error: "URL must be at least 3 characters" };
+  if (slug.length > 60) return { error: "URL must be 60 characters or fewer" };
+
+  const admin = getSupabaseAdmin();
+  // Verify ownership and grab old slug for revalidation
+  const { data: gallery } = await admin
+    .from("galleries")
+    .select("id, slug")
+    .eq("id", galleryId)
+    .eq("owner_id", user.id)
+    .single();
+  if (!gallery) return { error: "Gallery not found" };
+
+  // If it's unchanged, treat as ok no-op
+  if (gallery.slug === slug) return { ok: true, value: slug };
+
+  // Make sure no other gallery owns this slug
+  const { data: clash } = await admin
+    .from("galleries")
+    .select("id")
+    .eq("slug", slug)
+    .neq("id", galleryId)
+    .maybeSingle();
+  if (clash) return { error: "That URL is already taken by another gallery" };
+
+  const { error } = await admin
+    .from("galleries")
+    .update({ slug })
+    .eq("id", galleryId);
+  if (error) return { error: error.message };
+
+  // Old + new + admin paths
+  revalidatePath(`/g/${gallery.slug}`);
+  revalidatePath(`/g/${slug}`);
+  revalidatePath(`/admin/galleries/${galleryId}`);
+  return { ok: true, value: slug };
+}
+
 export async function renameGallery(galleryId: string, formData: FormData) {
   const user = await requireUser();
   const name = String(formData.get("name") || "").trim();

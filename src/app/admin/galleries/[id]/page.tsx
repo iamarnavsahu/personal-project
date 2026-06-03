@@ -10,6 +10,7 @@ import { PasscodeUpdateForm } from "./passcode-update-form";
 import { GalleryDetailsForm } from "./gallery-details-form";
 import { PickLimitForm } from "./pick-limit-form";
 import { ShareLinkBox } from "./share-link-box";
+import { SlugForm } from "./slug-form";
 
 export default async function GalleryAdminPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
@@ -78,6 +79,8 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
 
         <PasscodeUpdateForm galleryId={gallery.id} />
       </div>
+
+      <SlugForm galleryId={gallery.id} currentSlug={gallery.slug} />
 
       <PickLimitForm galleryId={gallery.id} current={gallery.pick_limit ?? null} />
 
