@@ -18,40 +18,49 @@ export function Uploader({ galleryId }: { galleryId: string }) {
     setErr(null);
     const arr = Array.from(files);
 
-    // Upload in chunks of 12 — each chunk uploads its files in parallel
-    // on the server, so the wall-clock time scales with chunk count, not
-    // file count. Two chunks fire concurrently as well.
+    // Upload in chunks. Each chunk goes to a single Vercel server-action
+    // invocation, which has a wall-clock execution limit. We keep chunks
+    // small (6 files) so even multi-megabyte JPEGs finish well under the
+    // limit, and run them sequentially to avoid lost rows when two chunks
+    // hit the same gallery's sort_order calculation simultaneously.
     start(async () => {
       try {
-        const chunkSize = 12;
+        const chunkSize = 6;
         const chunks: File[][] = [];
         for (let i = 0; i < arr.length; i += chunkSize) {
           chunks.push(arr.slice(i, i + chunkSize));
         }
 
         let done = 0;
-        // Two-at-a-time concurrency on the client side too.
-        const concurrency = 2;
-        let cursor = 0;
-        async function worker() {
-          while (cursor < chunks.length) {
-            const idx = cursor++;
-            const chunk = chunks[idx];
-            const fd = new FormData();
-            fd.append("galleryId", galleryId);
-            chunk.forEach((file) => fd.append("files", file));
+        for (let i = 0; i < chunks.length; i++) {
+          const chunk = chunks[i];
+          const fd = new FormData();
+          fd.append("galleryId", galleryId);
+          chunk.forEach((file) => fd.append("files", file));
+          try {
             await uploadPhotos(fd);
-            done += chunk.length;
-            setProgress(`Uploaded ${done} of ${arr.length}…`);
+          } catch (chunkErr: any) {
+            // Surface per-chunk failures with context — and stop, so the
+            // photographer isn't left wondering why N photos are missing.
+            const after = done;
+            const within = chunk.length;
+            throw new Error(
+              `${chunkErr?.message || "Upload failed"} (after ${after} of ${arr.length}; stopped on the next batch of ${within})`
+            );
           }
+          done += chunk.length;
+          setProgress(`Uploaded ${done} of ${arr.length}…`);
+          /* Refresh the grid mid-batch so the photographer sees photos
+             land as they upload, instead of waiting for the whole set. */
+          router.refresh();
         }
-        await Promise.all(Array.from({ length: concurrency }, worker));
 
         setProgress("");
         router.refresh();
       } catch (e: any) {
         setErr(e?.message || "Upload failed");
         setProgress("");
+        router.refresh();
       }
     });
   }

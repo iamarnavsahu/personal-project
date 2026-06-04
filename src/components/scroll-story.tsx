@@ -47,8 +47,12 @@ function Section1Upload() {
   });
 
   const laptopScale = useTransform(scrollYProgress, [0, 0.20, 1], [0.80, 1.0, 1.0]);
-  const laptopOpacity = useTransform(scrollYProgress, [0, 0.08], [0.3, 1]);
+  const laptopOpacity = useTransform(scrollYProgress, [0, 0.04], [0.6, 1]);
   const laptopY = useTransform(scrollYProgress, [0, 0.08], [50, 0]);
+  /* Gallery content inside the laptop starts dim and brightens as the
+     flying photos converge into the centre. Ties the "lighting up"
+     moment to the convergence finish around progress 0.40. */
+  const galleryOpacity = useTransform(scrollYProgress, [0.05, 0.42], [0.25, 1]);
 
   return (
     <section ref={ref} className="relative" style={{ height: "180vh" }}>
@@ -65,7 +69,9 @@ function Section1Upload() {
           className="origin-center"
         >
           <LaptopFrame>
-            <CreatorView mode="default" />
+            <motion.div style={{ opacity: galleryOpacity }}>
+              <CreatorView mode="default" />
+            </motion.div>
           </LaptopFrame>
         </motion.div>
 
