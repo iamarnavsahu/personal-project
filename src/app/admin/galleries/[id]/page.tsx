@@ -35,26 +35,33 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
 
   const { data: picks } = await admin
     .from("selections")
-    .select("photo_id, photos(id, filename, storage_path)")
+    .select("photo_id, photos(id, filename, storage_path, sort_order)")
     .eq("gallery_id", gallery.id);
   const pickedIds = new Set(picks?.map((p) => p.photo_id));
 
-  const pickedPhotos =
-    picks
-      ?.map((p) => {
-        const raw = p.photos as
-          | { id: string; filename: string; storage_path: string }
-          | { id: string; filename: string; storage_path: string }[]
-          | null;
-        const photo = Array.isArray(raw) ? raw[0] : raw;
-        if (!photo) return null;
-        return {
-          id: photo.id,
-          filename: photo.filename,
-          picksPath: pickStoragePath(gallery.id, photo.id, photo.filename)
-        };
-      })
-      .filter((p): p is { id: string; filename: string; picksPath: string } => !!p) ?? [];
+  const pickedPhotos = (() => {
+    const rows =
+      picks
+        ?.map((p) => {
+          const raw = p.photos as
+            | { id: string; filename: string; storage_path: string; sort_order: number }
+            | { id: string; filename: string; storage_path: string; sort_order: number }[]
+            | null;
+          const photo = Array.isArray(raw) ? raw[0] : raw;
+          if (!photo) return null;
+          return photo;
+        })
+        .filter(
+          (p): p is { id: string; filename: string; storage_path: string; sort_order: number } => !!p
+        ) ?? [];
+    rows.sort((a, b) => a.sort_order - b.sort_order);
+    return rows.map((photo, i) => ({
+      id: photo.id,
+      filename: photo.filename,
+      pickNumber: i + 1,
+      picksPath: pickStoragePath(gallery.id, i + 1, photo.filename)
+    }));
+  })();
 
   // Backfill picks folder for galleries submitted before this feature shipped.
   if (gallery.is_locked && pickedPhotos.length > 0) {

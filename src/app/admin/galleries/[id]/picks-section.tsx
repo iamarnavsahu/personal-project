@@ -76,16 +76,17 @@ export function PicksSection({
   if (!picks.length) {
     return (
       <div id="client-picks" className="card border-2 border-dashed border-ink/15">
-        <h2 className="font-semibold">📁 Client picks folder</h2>
+        <h2 className="font-semibold">📁 Edits folder (client picks)</h2>
         <p className="mt-2 text-sm text-ink/65">
-          When your client stars photos and clicks <strong>Submit picks</strong>, their
-          selections are copied into a separate folder you can download or browse in Supabase.
+          When your client clicks <strong>Submit picks</strong>, their selections are copied
+          into a numbered <code className="rounded bg-ink/5 px-1 text-xs">…/picks/</code> folder
+          sorted in gallery order — ready for your edit workflow.
         </p>
         <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-ink/60">
-          <li>Client opens their gallery link and enters the passcode</li>
-          <li>They star their favorites</li>
+          <li>Client stars their favorites in the gallery</li>
           <li>They click <strong>Submit picks</strong></li>
-          <li>This section fills with their picks + a download button</li>
+          <li>Files land as <code className="text-xs">0001-name.jpg</code>, <code className="text-xs">0002-name.jpg</code>, etc.</li>
+          <li>Download the picks ZIP here or browse in Supabase Storage</li>
         </ol>
         <p className="mt-3 text-xs text-ink/50">
           Storage path: <code className="rounded bg-ink/5 px-1">{galleryId}/picks/</code>
@@ -98,11 +99,14 @@ export function PicksSection({
     <div id="client-picks" className="card border-clay/30 bg-clay/[0.04]">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-semibold">📁 Client picks folder</h2>
+          <h2 className="font-semibold">📁 Edits folder (client picks)</h2>
           <p className="mt-1 text-sm text-ink/65">
-            {picks.length} photo{picks.length === 1 ? "" : "s"} copied to{" "}
-            <code className="rounded bg-ink/5 px-1 py-0.5 text-xs">…/picks/</code>{" "}
-            {isLocked ? "after your client submitted." : "from their current selection."}
+            {picks.length} photo{picks.length === 1 ? "" : "s"} sorted in gallery order as{" "}
+            <code className="rounded bg-ink/5 px-1 py-0.5 text-xs">0001-…</code> through{" "}
+            <code className="rounded bg-ink/5 px-1 py-0.5 text-xs">
+              {String(picks.length).padStart(4, "0")}-…
+            </code>
+            {isLocked ? " — client submitted." : " — current selection (re-sync after submit)."}
           </p>
           <p className="mt-1 text-xs text-ink/55">
             In Supabase Storage, browse bucket <strong>photos</strong> → folder{" "}
