@@ -75,22 +75,30 @@ export function PicksSection({
 
   if (!picks.length) {
     return (
-      <div className="card">
-        <h2 className="font-semibold">Client picks folder</h2>
-        <p className="mt-1 text-sm text-ink/60">
-          When your client submits their picks, copies land in a separate{" "}
-          <code className="rounded bg-ink/5 px-1 py-0.5 text-xs">{galleryId.slice(0, 8)}…/picks/</code>{" "}
-          folder in storage. Nothing here yet.
+      <div id="client-picks" className="card border-2 border-dashed border-ink/15">
+        <h2 className="font-semibold">📁 Client picks folder</h2>
+        <p className="mt-2 text-sm text-ink/65">
+          When your client stars photos and clicks <strong>Submit picks</strong>, their
+          selections are copied into a separate folder you can download or browse in Supabase.
+        </p>
+        <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-ink/60">
+          <li>Client opens their gallery link and enters the passcode</li>
+          <li>They star their favorites</li>
+          <li>They click <strong>Submit picks</strong></li>
+          <li>This section fills with their picks + a download button</li>
+        </ol>
+        <p className="mt-3 text-xs text-ink/50">
+          Storage path: <code className="rounded bg-ink/5 px-1">{galleryId}/picks/</code>
         </p>
       </div>
     );
   }
 
   return (
-    <div className="card border-clay/30 bg-clay/[0.04]">
+    <div id="client-picks" className="card border-clay/30 bg-clay/[0.04]">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-semibold">Client picks folder</h2>
+          <h2 className="font-semibold">📁 Client picks folder</h2>
           <p className="mt-1 text-sm text-ink/65">
             {picks.length} photo{picks.length === 1 ? "" : "s"} copied to{" "}
             <code className="rounded bg-ink/5 px-1 py-0.5 text-xs">…/picks/</code>{" "}

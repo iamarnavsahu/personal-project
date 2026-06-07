@@ -65,6 +65,14 @@ export function SubmitStatus({
             If they got here by mistake, unlock the gallery to let them keep
             picking.
           </p>
+          {pickedCount > 0 && (
+            <a
+              href="#client-picks"
+              className="mt-2 inline-block text-sm font-medium text-ink underline underline-offset-2 hover:text-ink/70"
+            >
+              View client picks folder ↓
+            </a>
+          )}
         </div>
         <span className="rounded-full bg-clay px-3 py-1 text-[10px] uppercase tracking-widest text-paper">
           ✓ Submitted

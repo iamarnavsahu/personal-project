@@ -49,9 +49,12 @@ export default async function AdminHome() {
                   </div>
                   {g.is_locked && <span className="border border-ink/30 px-2 py-0.5 text-[10px] uppercase tracking-widest text-ink/70">locked</span>}
                 </div>
-                <div className="mt-3 flex gap-4 text-sm text-ink/60">
+                <div className="mt-3 flex flex-wrap gap-4 text-sm text-ink/60">
                   <span>{counts[g.id]?.photos ?? 0} photos</span>
                   <span>{counts[g.id]?.picks ?? 0} picks</span>
+                  {g.is_locked && (counts[g.id]?.picks ?? 0) > 0 && (
+                    <span className="text-ink">★ picks folder ready</span>
+                  )}
                 </div>
               </Link>
             </li>

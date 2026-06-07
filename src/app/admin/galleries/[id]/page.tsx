@@ -13,7 +13,7 @@ import { ShareLinkBox } from "./share-link-box";
 import { SlugForm } from "./slug-form";
 import { SubmitStatus } from "./submit-status";
 import { PicksSection } from "./picks-section";
-import { pickStoragePath } from "@/lib/picks-folder";
+import { pickStoragePath, picksFolderPrefix, syncPicksToFolder } from "@/lib/picks-folder";
 
 export default async function GalleryAdminPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
@@ -55,6 +55,20 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
         };
       })
       .filter((p): p is { id: string; filename: string; picksPath: string } => !!p) ?? [];
+
+  // Backfill picks folder for galleries submitted before this feature shipped.
+  if (gallery.is_locked && pickedPhotos.length > 0) {
+    const { data: existingPicks } = await admin.storage
+      .from("photos")
+      .list(picksFolderPrefix(gallery.id));
+    if (!existingPicks?.length) {
+      try {
+        await syncPicksToFolder(admin, gallery.id);
+      } catch (e) {
+        console.error("[gallery admin] picks folder backfill failed:", e);
+      }
+    }
+  }
 
   // Signed URLs for previews (1 hour). Wrap each in an image transform
   // so the browser pulls a ~400px thumbnail instead of the full-size JPEG.
