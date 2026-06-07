@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { syncPicksToFolder } from "@/lib/picks-folder";
 
 function cookieName(galleryId: string) {
   return `picka_g_${galleryId}`;
@@ -120,8 +121,29 @@ export async function togglePick(galleryId: string, photoId: string, slug: strin
 export async function submitPicks(galleryId: string, slug: string) {
   if (cookies().get(cookieName(galleryId))?.value !== "1") return { error: "Locked" };
   const admin = getSupabaseAdmin();
-  await admin.from("galleries").update({ is_locked: true }).eq("id", galleryId);
+
+  const { count } = await admin
+    .from("selections")
+    .select("id", { count: "exact", head: true })
+    .eq("gallery_id", galleryId);
+  if (!count) return { error: "Pick at least one photo first." };
+
+  try {
+    await syncPicksToFolder(admin, galleryId);
+  } catch (e: any) {
+    console.error("[submitPicks] picks folder sync failed:", e);
+    return { error: e?.message || "Could not save your picks. Try again." };
+  }
+
+  const { error } = await admin
+    .from("galleries")
+    .update({ is_locked: true })
+    .eq("id", galleryId);
+  if (error) return { error: error.message };
+
   revalidatePath(`/g/${slug}`);
+  revalidatePath(`/admin/galleries/${galleryId}`);
+  return { ok: true };
 }
 
 export async function relockGallery(galleryId: string, slug: string) {

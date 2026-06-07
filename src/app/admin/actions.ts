@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { slugify, randomSlug } from "@/lib/utils";
+import { clearPicksFolder, syncPicksToFolder } from "@/lib/picks-folder";
 
 const BUCKET = "photos";
 
@@ -39,7 +40,7 @@ export async function createGallery(formData: FormData) {
     .single();
 
   if (error) throw new Error(error.message);
-  redirect(`/admin/galleries/${data!.id}`);
+  return { id: data!.id as string };
 }
 
 export async function updatePickLimit(galleryId: string, formData: FormData) {
@@ -79,6 +80,128 @@ const ALLOWED_IMAGE_MIME = new Set([
   "image/heif"
 ]);
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB per file
+const UPLOAD_BATCH_SIZE = 15;
+
+export type PhotoUploadMeta = { name: string; type: string; size: number };
+
+export type PreparedUpload = {
+  path: string;
+  signedUrl: string;
+  filename: string;
+  sortOrder: number;
+  contentType: string;
+};
+
+function guessMime(name: string, type: string) {
+  const mime = type.toLowerCase();
+  if (mime) return mime;
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  if (ext === "png") return "image/png";
+  if (ext === "webp") return "image/webp";
+  if (ext === "heic") return "image/heic";
+  if (ext === "heif") return "image/heif";
+  return "";
+}
+
+function validateFileMeta(file: PhotoUploadMeta) {
+  const mime = guessMime(file.name, file.type);
+  if (!ALLOWED_IMAGE_MIME.has(mime)) {
+    throw new Error(`${file.name} is not a supported image type.`);
+  }
+  if (file.size > MAX_FILE_BYTES) {
+    throw new Error(`${file.name} is larger than 25 MB.`);
+  }
+  return mime;
+}
+
+async function assertGalleryOwner(galleryId: string, ownerId: string) {
+  const admin = getSupabaseAdmin();
+  const { data: gallery, error } = await admin
+    .from("galleries")
+    .select("id")
+    .eq("id", galleryId)
+    .eq("owner_id", ownerId)
+    .single();
+  if (error || !gallery) throw new Error("Gallery not found");
+}
+
+async function nextSortOrder(galleryId: string) {
+  const admin = getSupabaseAdmin();
+  const { data: maxRow } = await admin
+    .from("photos")
+    .select("sort_order")
+    .eq("gallery_id", galleryId)
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (maxRow?.sort_order ?? -1) + 1;
+}
+
+/** Step 1: reserve storage paths + signed upload URLs (tiny server request). */
+export async function preparePhotoUploads(galleryId: string, files: PhotoUploadMeta[]) {
+  const user = await requireUser();
+  if (!galleryId) throw new Error("Missing galleryId");
+  if (!files.length) throw new Error("No files selected");
+  if (files.length > UPLOAD_BATCH_SIZE) {
+    throw new Error(`Upload at most ${UPLOAD_BATCH_SIZE} photos per batch`);
+  }
+
+  const admin = getSupabaseAdmin();
+  await assertGalleryOwner(galleryId, user.id);
+
+  const baseOrder = await nextSortOrder(galleryId);
+  const items: PreparedUpload[] = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const contentType = validateFileMeta(file);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${galleryId}/${crypto.randomUUID()}.${ext}`;
+    const { data, error } = await admin.storage.from(BUCKET).createSignedUploadUrl(path);
+    if (error || !data?.signedUrl) {
+      throw new Error(`${file.name}: ${error?.message || "Could not start upload"}`);
+    }
+    items.push({
+      path,
+      signedUrl: data.signedUrl,
+      filename: file.name,
+      sortOrder: baseOrder + i,
+      contentType
+    });
+  }
+
+  return { items };
+}
+
+/** Step 2: save DB rows after the browser uploaded directly to Supabase. */
+export async function finalizePhotoUploads(
+  galleryId: string,
+  items: { path: string; filename: string; sortOrder: number }[]
+) {
+  const user = await requireUser();
+  if (!galleryId) throw new Error("Missing galleryId");
+  if (!items.length) throw new Error("No uploaded files to save");
+
+  const admin = getSupabaseAdmin();
+  await assertGalleryOwner(galleryId, user.id);
+
+  const rows = items.map((item) => ({
+    gallery_id: galleryId,
+    storage_path: item.path,
+    filename: item.filename,
+    sort_order: item.sortOrder
+  }));
+
+  const { error: insErr } = await admin.from("photos").insert(rows);
+  if (insErr) {
+    await admin.storage.from(BUCKET).remove(items.map((i) => i.path));
+    throw new Error(insErr.message);
+  }
+
+  revalidatePath(`/admin/galleries/${galleryId}`);
+  return { uploaded: rows.length };
+}
 
 export async function uploadPhotos(formData: FormData) {
   const user = await requireUser();
@@ -118,11 +241,18 @@ export async function uploadPhotos(formData: FormData) {
     .maybeSingle();
   const baseOrder = (maxRow?.sort_order ?? -1) + 1;
 
-  // Upload all files in parallel. This is the real speedup — the previous
-  // for/await version uploaded one at a time, so a 5-file chunk took ~5x
-  // longer than necessary.
-  const rows = await Promise.all(
-    files.map(async (file, i) => {
+  // Upload one file at a time so large batches stay under serverless limits.
+  const rows: {
+    gallery_id: string;
+    storage_path: string;
+    filename: string;
+    sort_order: number;
+  }[] = [];
+  const uploadedPaths: string[] = [];
+
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const mime = file.type.toLowerCase();
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `${galleryId}/${crypto.randomUUID()}.${ext}`;
@@ -130,21 +260,27 @@ export async function uploadPhotos(formData: FormData) {
       const { error: upErr } = await admin.storage
         .from(BUCKET)
         .upload(path, bytes, { contentType: mime || "image/jpeg", upsert: false });
-      if (upErr) throw new Error(upErr.message);
-      return {
+      if (upErr) throw new Error(`${file.name}: ${upErr.message}`);
+      uploadedPaths.push(path);
+      rows.push({
         gallery_id: galleryId,
         storage_path: path,
         filename: file.name,
         sort_order: baseOrder + i
-      };
-    })
-  );
+      });
+    }
 
-  // Single bulk INSERT instead of N round-trips.
-  const { error: insErr } = await admin.from("photos").insert(rows);
-  if (insErr) throw new Error(insErr.message);
+    const { error: insErr } = await admin.from("photos").insert(rows);
+    if (insErr) throw new Error(insErr.message);
+  } catch (err) {
+    if (uploadedPaths.length) {
+      await admin.storage.from(BUCKET).remove(uploadedPaths);
+    }
+    throw err;
+  }
 
   revalidatePath(`/admin/galleries/${galleryId}`);
+  return { uploaded: rows.length };
 }
 
 export async function updateGallerySlug(galleryId: string, formData: FormData) {
@@ -287,9 +423,31 @@ export async function unlockGallery(galleryId: string) {
     .eq("id", galleryId);
   if (error) return { error: error.message };
 
+  await clearPicksFolder(admin, galleryId);
+
   revalidatePath(`/admin/galleries/${galleryId}`);
   revalidatePath(`/g/${gallery.slug}`);
   return { ok: true };
+}
+
+export async function resyncPicksFolder(galleryId: string) {
+  const user = await requireUser();
+  const admin = getSupabaseAdmin();
+  const { data: gallery } = await admin
+    .from("galleries")
+    .select("id, slug")
+    .eq("id", galleryId)
+    .eq("owner_id", user.id)
+    .single();
+  if (!gallery) return { error: "Gallery not found" };
+
+  try {
+    const { copied } = await syncPicksToFolder(admin, galleryId);
+    revalidatePath(`/admin/galleries/${galleryId}`);
+    return { ok: true, copied };
+  } catch (e: any) {
+    return { error: e?.message || "Could not sync picks folder" };
+  }
 }
 
 export async function bulkDeletePhotos(galleryId: string, photoIds: string[]) {

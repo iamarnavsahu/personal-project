@@ -171,7 +171,11 @@ export function ClientGallery({
     }
     if (!confirm(`Send ${pickedCount} favorite${pickedCount === 1 ? "" : "s"} to your photographer? You won't be able to change them after.`)) return;
     start(async () => {
-      await submitPicks(galleryId, slug);
+      const res = await submitPicks(galleryId, slug);
+      if (res?.error) {
+        showToast(res.error);
+        return;
+      }
       setSubmitted(true);
       setJustSubmitted(true);
       // Auto-dismiss after 4.5s — fade-out runs another 0.8s on top.

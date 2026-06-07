@@ -12,6 +12,8 @@ import { PickLimitForm } from "./pick-limit-form";
 import { ShareLinkBox } from "./share-link-box";
 import { SlugForm } from "./slug-form";
 import { SubmitStatus } from "./submit-status";
+import { PicksSection } from "./picks-section";
+import { pickStoragePath } from "@/lib/picks-folder";
 
 export default async function GalleryAdminPage({ params }: { params: { id: string } }) {
   const user = await requireUser();
@@ -33,9 +35,26 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
 
   const { data: picks } = await admin
     .from("selections")
-    .select("photo_id")
+    .select("photo_id, photos(id, filename, storage_path)")
     .eq("gallery_id", gallery.id);
   const pickedIds = new Set(picks?.map((p) => p.photo_id));
+
+  const pickedPhotos =
+    picks
+      ?.map((p) => {
+        const raw = p.photos as
+          | { id: string; filename: string; storage_path: string }
+          | { id: string; filename: string; storage_path: string }[]
+          | null;
+        const photo = Array.isArray(raw) ? raw[0] : raw;
+        if (!photo) return null;
+        return {
+          id: photo.id,
+          filename: photo.filename,
+          picksPath: pickStoragePath(gallery.id, photo.id, photo.filename)
+        };
+      })
+      .filter((p): p is { id: string; filename: string; picksPath: string } => !!p) ?? [];
 
   // Signed URLs for previews (1 hour). Wrap each in an image transform
   // so the browser pulls a ~400px thumbnail instead of the full-size JPEG.
@@ -67,6 +86,16 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
         pickedCount={pickedIds.size}
       />
 
+      <PicksSection
+        galleryId={gallery.id}
+        galleryName={gallery.name}
+        isLocked={!!gallery.is_locked}
+        picks={pickedPhotos.map((p) => ({
+          ...p,
+          url: urlMap.get(p.id) ?? ""
+        }))}
+      />
+
       <GalleryDetailsForm
         galleryId={gallery.id}
         name={gallery.name}
@@ -93,6 +122,10 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
 
       <div>
         <h2 className="font-semibold">Upload photos</h2>
+        <p className="mt-1 text-xs text-ink/50">
+          Gallery ID: <code className="rounded bg-ink/5 px-1">{gallery.id}</code>
+          {" "}— make sure you are on the right gallery before uploading.
+        </p>
         <Uploader galleryId={gallery.id} />
       </div>
 
