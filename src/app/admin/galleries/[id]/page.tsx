@@ -109,7 +109,6 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
 
       <PicksSection
         galleryId={gallery.id}
-        galleryName={gallery.name}
         isLocked={!!gallery.is_locked}
         picks={pickedPhotos.map((p) => ({
           ...p,
@@ -151,10 +150,8 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-semibold">Photos ({photos?.length ?? 0})</h2>
-          <p className="text-sm text-ink/60">{pickedIds.size} picked by client</p>
-        </div>
+        <h2 className="font-semibold">All photos ({photos?.length ?? 0})</h2>
+        <p className="mt-1 text-sm text-ink/60">Upload and manage the full gallery. Client picks are above.</p>
         {!photos?.length ? (
           <p className="mt-4 text-ink/60">No photos yet. Upload above.</p>
         ) : (
@@ -164,8 +161,7 @@ export default async function GalleryAdminPage({ params }: { params: { id: strin
               photos={photos.map((p) => ({
                 id: p.id,
                 filename: p.filename,
-                url: urlMap.get(p.id) ?? "",
-                picked: pickedIds.has(p.id)
+                url: urlMap.get(p.id) ?? ""
               }))}
             />
           </div>

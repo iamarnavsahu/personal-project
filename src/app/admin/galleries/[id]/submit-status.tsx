@@ -70,7 +70,7 @@ export function SubmitStatus({
               href="#client-picks"
               className="mt-2 inline-block text-sm font-medium text-ink underline underline-offset-2 hover:text-ink/70"
             >
-              View edits folder ↓
+              View client picks ↓
             </a>
           )}
         </div>

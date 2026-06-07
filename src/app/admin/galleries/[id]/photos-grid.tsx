@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { bulkDeletePhotos, deletePhoto } from "@/app/admin/actions";
 
-type Photo = { id: string; filename: string; url: string; picked: boolean };
+type Photo = { id: string; filename: string; url: string };
 
 export function PhotosGrid({
   galleryId,
@@ -149,13 +149,6 @@ export function PhotosGrid({
                   aria-hidden
                 >
                   {isSelected ? "✓" : ""}
-                </span>
-              )}
-
-              {/* Picked badge */}
-              {p.picked && !selectMode && (
-                <span className="absolute left-2 top-2 rounded bg-ink px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-paper">
-                  ★ picked
                 </span>
               )}
 

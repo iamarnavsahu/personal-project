@@ -52,8 +52,8 @@ export default async function AdminHome() {
                 <div className="mt-3 flex flex-wrap gap-4 text-sm text-ink/60">
                   <span>{counts[g.id]?.photos ?? 0} photos</span>
                   <span>{counts[g.id]?.picks ?? 0} picks</span>
-                  {g.is_locked && (counts[g.id]?.picks ?? 0) > 0 && (
-                    <span className="text-ink">★ picks folder ready</span>
+                  {(counts[g.id]?.picks ?? 0) > 0 && (
+                    <span className="text-ink">{counts[g.id]?.picks} client picks</span>
                   )}
                 </div>
               </Link>
